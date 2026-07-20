@@ -19,7 +19,7 @@ const ENTITY_CONFIG = {
   'SCL': {
     fullName: "Sales Connect Ltd",
     logo: "/assets/scl_logo.png",
-    color: "#dc2626", // Crimson
+    color: "#881337", // Burgundy
     class: "badge-entity-scl",
     glowClass: "scl-glow"
   },
