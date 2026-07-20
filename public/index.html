@@ -1,0 +1,437 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>IMS Group Expense Tracker</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Style Link -->
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Background decorations for modern glassmorphism aesthetic -->
+  <div class="bg-glow bg-glow-1"></div>
+  <div class="bg-glow bg-glow-2"></div>
+
+  <div class="app-container">
+    
+    <!-- Sidebar / Navigation -->
+    <header class="app-header">
+      <div class="brand">
+        <div class="brand-logo" style="background: white; padding: 4px; display: flex; align-items: center; justify-content: center; width: 44px; height: 36px; border-radius: 6px; box-shadow: var(--shadow-glow);">
+          <img src="/assets/ims_logo.png" style="max-height: 28px; max-width: 36px; object-fit: contain;" alt="IMS Group Logo">
+        </div>
+        <span style="font-weight: 800; font-size: 1.25rem; letter-spacing: -0.5px;">IMS <span style="background: linear-gradient(90deg, #ef4444, #f97316); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">Group</span></span>
+      </div>
+      <nav class="nav-links">
+        <button class="nav-btn active" data-target="dashboard-section">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="9"/><rect x="14" y="3" width="7" height="5"/><rect x="14" y="12" width="7" height="9"/><rect x="3" y="16" width="7" height="5"/></svg>
+          Dashboard
+        </button>
+        <button class="nav-btn" data-target="expenses-section">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+          Expense Manager
+        </button>
+        <button class="nav-btn" data-target="reporting-section">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          Report Generator
+        </button>
+      </nav>
+      <div class="exchange-rates-badge" id="exchange-badge">
+        <span>$1 = <span id="usd-rate-text">120</span> TK</span>
+        <span>€1 = <span id="eur-rate-text">130</span> TK</span>
+        <button class="settings-trigger-btn" onclick="openSettingsModal()" title="Edit Exchange Rates" style="margin-right: 0.5rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+        </button>
+        <div style="width: 1px; height: 16px; background: rgba(255, 255, 255, 0.15); margin-right: 0.5rem; display: inline-block; vertical-align: middle;"></div>
+        <button class="settings-trigger-btn" onclick="toggleTheme()" id="theme-toggle-btn" title="Toggle Day/Dark Mode">
+          <svg id="theme-icon-dark" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+          <svg id="theme-icon-light" class="hidden" xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      
+      <!-- SECTION: DASHBOARD -->
+      <section id="dashboard-section" class="tab-content active">
+        <div class="section-header-actions" style="margin-bottom: 2rem;">
+          <div>
+            <h1>Financial Dashboard</h1>
+            <p>Real-time expense distribution across IMS, CLAN, and SCL groups converted to BDT.</p>
+          </div>
+          <div class="toggle-row">
+            <button class="toggle-btn active" id="toggle-monthly" onclick="changeViewMode('monthly')">Monthly View</button>
+            <button class="toggle-btn" id="toggle-daily" onclick="changeViewMode('daily')">Daily View</button>
+            <button class="toggle-btn" id="toggle-yearly" onclick="changeViewMode('yearly')">Yearly View</button>
+          </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="metrics-grid">
+          <div class="metric-card main-metric">
+            <div class="metric-info">
+              <span class="metric-label">Total Monthly Expenses (BDT)</span>
+              <h2 id="metric-total-bdt">0 <span class="currency-unit">TK</span></h2>
+              <span class="sub-label" id="conversion-notice">Converted using custom rates</span>
+            </div>
+            <div class="metric-icon">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="metric-label">USD Expense Portion</span>
+              <h3 id="metric-total-usd">$0.00</h3>
+              <span class="sub-label" id="metric-total-usd-converted">0 TK equivalent</span>
+            </div>
+            <div class="metric-icon secondary">
+              <span>$</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="metric-label">EUR Expense Portion</span>
+              <h3 id="metric-total-eur">€0.00</h3>
+              <span class="sub-label" id="metric-total-eur-converted">0 TK equivalent</span>
+            </div>
+            <div class="metric-icon secondary">
+              <span>€</span>
+            </div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-info">
+              <span class="metric-label">Native BDT Expenses</span>
+              <h3 id="metric-native-bdt">0 TK</h3>
+              <span class="sub-label">Direct TK charges</span>
+            </div>
+            <div class="metric-icon secondary">
+              <span>৳</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="charts-grid">
+          <div class="chart-card glass-panel">
+            <h3>Expenses by Entity</h3>
+            <div class="chart-container">
+              <canvas id="entityChart"></canvas>
+            </div>
+          </div>
+          <div class="chart-card glass-panel">
+            <h3>Expenses by Category</h3>
+            <div class="chart-container">
+              <canvas id="categoryChart"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: EXPENSE MANAGER -->
+      <section id="expenses-section" class="tab-content">
+        <div class="section-header-actions">
+          <div>
+            <h1>Expense Manager</h1>
+            <p>View, search, edit and register new monthly subscription items.</p>
+          </div>
+          <button class="btn btn-primary" onclick="openExpenseModal()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Add New Item
+          </button>
+        </div>
+
+        <!-- Filters Toolbar -->
+        <div class="toolbar glass-panel">
+          <div class="search-box">
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            <input type="text" id="table-search" placeholder="Search by name, email or details..." oninput="filterTable()">
+          </div>
+          
+          <div class="entity-tabs-row" id="entity-filter-tabs">
+            <button class="filter-tab active" data-filter="all">All</button>
+            <button class="filter-tab" data-filter="IMS">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <img src="/assets/ims_logo.png" style="height: 12px; max-width: 36px; object-fit: contain; background: white; padding: 1px 3px; border-radius: 2px;" alt="IMS">
+                <span>IMS</span>
+              </div>
+            </button>
+            <button class="filter-tab" data-filter="CLAN">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <img src="/assets/clan_logo.png" style="height: 12px; max-width: 36px; object-fit: contain; background: white; padding: 1px 3px; border-radius: 2px;" alt="CLAN">
+                <span>CLAN</span>
+              </div>
+            </button>
+            <button class="filter-tab" data-filter="SCL">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <img src="/assets/scl_logo.png" style="height: 12px; max-width: 36px; object-fit: contain; background: white; padding: 1px 3px; border-radius: 2px;" alt="SCL">
+                <span>SCL</span>
+              </div>
+            </button>
+            <button class="filter-tab" data-filter="TP">
+              <div style="display: flex; align-items: center; gap: 6px;">
+                <img src="/assets/tp_logo.png" style="height: 12px; max-width: 36px; object-fit: contain; background: white; padding: 1px 3px; border-radius: 2px;" alt="TP">
+                <span>TP</span>
+              </div>
+            </button>
+          </div>
+
+          <div class="category-select-wrapper">
+            <select id="category-filter" onchange="filterTable()">
+              <option value="all">All Categories</option>
+              <option value="Monthly AI">Monthly AI</option>
+              <option value="Software">Software</option>
+              <option value="Internet">Internet</option>
+              <option value="Mail">Mail</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Expenses Table -->
+        <div class="table-container glass-panel">
+          <table id="expenses-table">
+            <thead>
+              <tr>
+                <th>Entity</th>
+                <th>Category</th>
+                <th>Item / User</th>
+                <th>Email</th>
+                <th>Cost (Original)</th>
+                <th>Extra Credits</th>
+                <th>Cost (BDT)</th>
+                <th>Due Date</th>
+                <th>Details</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody id="expenses-tbody">
+              <!-- Dynamically populated -->
+            </tbody>
+          </table>
+          <div id="no-records" class="empty-state hidden">
+            <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"/><polyline points="14 2 14 8 20 8"/><path d="M12 18v-4"/><path d="M12 12h.01"/></svg>
+            <p>No matching expenses found.</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- SECTION: REPORT GENERATOR -->
+      <section id="reporting-section" class="tab-content">
+        <div class="section-header">
+          <h1>Management Report Generator</h1>
+          <p>Consolidate costs and format a gorgeous email report optimized for Microsoft Outlook.</p>
+        </div>
+
+        <div class="reporting-grid">
+          
+          <!-- Control panel -->
+          <div class="report-settings-panel glass-panel">
+            <h3>Report Configurations</h3>
+            
+            <div class="form-group">
+              <label for="report-month">Billing Month</label>
+              <input type="month" id="report-month" value="2026-07">
+            </div>
+
+            <div class="form-group">
+              <label for="report-manager-email">Manager's Email Address</label>
+              <input type="email" id="report-manager-email" placeholder="management@company.com" value="management@ims.com.bd">
+            </div>
+
+            <div class="form-group">
+              <label for="report-subject">Subject Line Prefix</label>
+              <input type="text" id="report-subject" value="Monthly Subscription Expense Summary -">
+            </div>
+
+            <div class="form-group">
+              <label for="custom-intro">Custom Introduction Paragraph</label>
+              <textarea id="custom-intro" rows="4" placeholder="Dear Management, please find below the detailed report of our monthly expenses across different entities.">Dear Management,
+
+Please find below the consolidated monthly subscription expenses (AI accounts, Software Licenses, Mail servers, and Internet bills) across IMS, CLAN, and SCL entities for your review.</textarea>
+            </div>
+
+            <div class="form-group check-group">
+              <input type="checkbox" id="include-charts-in-report" checked>
+              <label for="include-charts-in-report">Include entity-wise summaries</label>
+            </div>
+
+            <button class="btn btn-primary btn-block" onclick="generateReport()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+              Generate Draft Report
+            </button>
+          </div>
+
+          <!-- Report Preview Panel -->
+          <div class="report-preview-panel glass-panel">
+            <div class="preview-header">
+              <h3>Email Draft Preview</h3>
+              <div class="preview-actions">
+                <button class="btn btn-secondary btn-sm" onclick="copyReportHTML()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+                  Copy Rich-Text for Outlook
+                </button>
+                <button class="btn btn-accent btn-sm" onclick="sendOutlookMail()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                  Draft in Outlook
+                </button>
+              </div>
+            </div>
+            
+            <div class="email-envelope">
+              <div class="envelope-row">
+                <span class="env-label">To:</span>
+                <span class="env-value" id="preview-to">management@ims.com.bd</span>
+              </div>
+              <div class="envelope-row">
+                <span class="env-label">Subject:</span>
+                <span class="env-value" id="preview-subject">Monthly Subscription Expense Summary - July 2026</span>
+              </div>
+              <div class="email-body-content" id="report-html-body">
+                <!-- Programmatically generated preview -->
+                <p style="color: #64748b; text-align: center; margin-top: 50px;">Configure options and click "Generate Draft Report" to view the HTML formatting.</p>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <!-- MODAL: ADD / EDIT EXPENSE -->
+  <div class="modal-backdrop" id="expense-modal">
+    <div class="modal glass-panel">
+      <div class="modal-header">
+        <h3 id="modal-title">Add Subscription / Expense Item</h3>
+        <button class="modal-close-btn" onclick="closeExpenseModal()">×</button>
+      </div>
+      <form id="expense-form" onsubmit="saveExpense(event)">
+        <input type="hidden" id="field-id">
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label for="field-entity">Entity / Company *</label>
+            <select id="field-entity" required>
+              <option value="IMS">Integrated Marketing Service Ltd. (IMS)</option>
+              <option value="CLAN">Country's Largest Audience Network (CLAN)</option>
+              <option value="SCL">Sales Connect Ltd (SCL)</option>
+              <option value="TP">Trade Pulse (TP)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="field-category">Category *</label>
+            <select id="field-category" required>
+              <option value="Monthly AI">Monthly AI</option>
+              <option value="Software">Software</option>
+              <option value="Internet">Internet</option>
+              <option value="Mail">Mail</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="field-name">Item Name / User *</label>
+            <input type="text" id="field-name" placeholder="e.g., Nazmus Sakib, Dtech HO" required>
+          </div>
+          <div class="form-group">
+            <label for="field-email">Associated Email (Optional)</label>
+            <input type="email" id="field-email" placeholder="user@company.com">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="field-price">Price / Cost *</label>
+            <input type="number" id="field-price" step="any" placeholder="0.00" required>
+          </div>
+          <div class="form-group">
+            <label for="field-billing-frequency">Base Billing Period *</label>
+            <select id="field-billing-frequency" required>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="field-currency">Currency *</label>
+            <select id="field-currency" required>
+              <option value="BDT">BDT (TK)</option>
+              <option value="USD">USD ($)</option>
+              <option value="EUR">EUR (€)</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="field-due-date">Due Date / Reference</label>
+            <input type="text" id="field-due-date" placeholder="e.g., 22nd each month, Yearly">
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="field-extra-cost">Extra Credit Cost (Optional)</label>
+            <input type="number" id="field-extra-cost" step="any" placeholder="0.00" value="0">
+          </div>
+          <div class="form-group">
+            <label for="field-extra-billing-frequency">Extra Credit Period</label>
+            <select id="field-extra-billing-frequency">
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="form-group">
+          <label for="field-details">Details / Specifications</label>
+          <textarea id="field-details" rows="3" placeholder="Additional details, connection speed, extra credit items..."></textarea>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeExpenseModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-save-btn">Save Expense</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: EXCHANGE RATES SETTINGS -->
+  <div class="modal-backdrop" id="settings-modal">
+    <div class="modal glass-panel modal-sm">
+      <div class="modal-header">
+        <h3>Exchange Rates (to BDT)</h3>
+        <button class="modal-close-btn" onclick="closeSettingsModal()">×</button>
+      </div>
+      <form id="settings-form" onsubmit="saveSettings(event)">
+        <div class="form-group">
+          <label for="rate-usd">USD to BDT Rate ($1 = x TK)</label>
+          <input type="number" id="rate-usd" step="any" required>
+        </div>
+        <div class="form-group">
+          <label for="rate-eur">EUR to BDT Rate (€1 = x TK)</label>
+          <input type="number" id="rate-eur" step="any" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Update Rates</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- TOAST NOTIFICATION CONTAINER -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- App Script -->
+  <script src="app.js"></script>
+</body>
+</html>
