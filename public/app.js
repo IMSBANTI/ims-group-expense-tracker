@@ -36,7 +36,7 @@ let expenses = [];
 let settings = { usd_to_bdt: 120, eur_to_bdt: 130 };
 let activeEntityFilter = 'all';
 let viewMode = 'monthly'; // 'monthly' or 'daily'
-const isReadOnly = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
+const isReadOnly = false; // Set to false to enable full live editing on Render.com
 
 // Config for cross-origin hosting (e.g. Netlify). Set to your Render URL.
 const API_URL = ""; 
