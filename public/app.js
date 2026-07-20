@@ -36,6 +36,7 @@ let expenses = [];
 let settings = { usd_to_bdt: 120, eur_to_bdt: 130 };
 let activeEntityFilter = 'all';
 let viewMode = 'monthly'; // 'monthly' or 'daily'
+const isReadOnly = window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1';
 
 // Config for cross-origin hosting (e.g. Netlify). Set to your Render URL.
 const API_URL = ""; 
@@ -56,13 +57,55 @@ document.addEventListener('DOMContentLoaded', () => {
 
   initNavigation();
   fetchSettings();
-  fetchExpenses();
+  fetchExpenses().then(() => {
+    applyReadOnlyUI();
+  });
 
   // Set default billing month to current month
   const today = new Date();
   const monthStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
   document.getElementById('report-month').value = monthStr;
 });
+
+function applyReadOnlyUI() {
+  if (isReadOnly) {
+    // Hide "Add Item" button
+    const addBtn = document.getElementById('add-expense-btn');
+    if (addBtn) addBtn.style.display = 'none';
+
+    // Hide edit/delete actions column in table headers
+    const ths = document.querySelectorAll('#expenses-table th');
+    if (ths.length >= 10) {
+      ths[9].style.display = 'none'; // 10th th (Actions) is index 9
+    }
+    
+    // Hide settings gear button in header
+    const settingsBtns = document.querySelectorAll('.settings-trigger-btn');
+    settingsBtns.forEach(btn => {
+      if (btn.getAttribute('onclick') === 'openSettingsModal()') {
+        btn.style.display = 'none';
+      }
+    });
+
+    // Add a notice below the toolbar that editing is disabled
+    const toolbar = document.querySelector('.toolbar');
+    if (toolbar && !document.getElementById('readonly-notice')) {
+      const notice = document.createElement('div');
+      notice.id = 'readonly-notice';
+      notice.className = 'glass-panel';
+      notice.style.gridColumn = '1 / -1';
+      notice.style.padding = '0.75rem 1rem';
+      notice.style.fontSize = '0.85rem';
+      notice.style.color = 'var(--text-muted)';
+      notice.style.border = '1px dashed var(--border-glass)';
+      notice.style.borderRadius = '8px';
+      notice.style.textAlign = 'center';
+      notice.style.marginTop = '1rem';
+      notice.innerHTML = `ℹ️ <strong>Read-Only Web View:</strong> Live adding or editing is disabled online. Run this app locally on your laptop to modify subscriptions, then push changes to GitHub.`;
+      toolbar.parentNode.insertBefore(notice, toolbar.nextSibling);
+    }
+  }
+}
 
 // Navigation logic
 function initNavigation() {
@@ -103,6 +146,7 @@ function initNavigation() {
 // API CLIENT CALLS
 // ==========================================================================
 async function fetchSettings() {
+  if (isReadOnly) return; // Loaded via fetchExpenses
   try {
     const res = await fetch(`${API_BASE}/api/settings`);
     if (!res.ok) throw new Error("Failed to load settings");
@@ -116,9 +160,18 @@ async function fetchSettings() {
 
 async function fetchExpenses() {
   try {
-    const res = await fetch(`${API_BASE}/api/expenses`);
-    if (!res.ok) throw new Error("Failed to load expenses");
-    expenses = await res.json();
+    if (isReadOnly) {
+      const res = await fetch('db.json');
+      if (!res.ok) throw new Error("Failed to load static database file");
+      const data = await res.json();
+      expenses = data.expenses || [];
+      settings = data.settings || { usd_to_bdt: 120, eur_to_bdt: 130 };
+      updateSettingsDisplay();
+    } else {
+      const res = await fetch(`${API_BASE}/api/expenses`);
+      if (!res.ok) throw new Error("Failed to load expenses");
+      expenses = await res.json();
+    }
     calculateMetrics();
     populateTable();
     renderCharts();
@@ -421,6 +474,22 @@ function populateTable() {
       entityLogoHTML = `<span class="badge ${config.class}">${exp.entity}</span>`;
     }
 
+    let actionsHTML = '';
+    if (!isReadOnly) {
+      actionsHTML = `
+        <td>
+          <div class="action-buttons">
+            <button class="btn-icon edit-btn" onclick="editExpense('${exp.id}')" title="Edit Item">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            </button>
+            <button class="btn-icon delete-btn" onclick="deleteExpense('${exp.id}')" title="Delete Item">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            </button>
+          </div>
+        </td>
+      `;
+    }
+
     tr.innerHTML = `
       <td>${entityLogoHTML}</td>
       <td><span class="badge badge-category">${exp.category}</span></td>
@@ -433,16 +502,7 @@ function populateTable() {
       <td class="text-muted" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${escapeHTML(exp.details || '')}">
         ${escapeHTML(exp.details || '-')}
       </td>
-      <td>
-        <div class="action-buttons">
-          <button class="btn-icon edit-btn" onclick="editExpense('${exp.id}')" title="Edit Item">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-          </button>
-          <button class="btn-icon delete-btn" onclick="deleteExpense('${exp.id}')" title="Delete Item">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-          </button>
-        </div>
-      </td>
+      ${actionsHTML}
     `;
     tbody.appendChild(tr);
   });
