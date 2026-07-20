@@ -609,9 +609,49 @@ function renderCharts() {
     }
   });
 
-  // 2. Category Chart (Bar)
+  // 2. Category Chart (Bar Chart with Entity Breakdown Stacking)
   const categoryLabels = Object.keys(categoryTotals);
-  const categoryData = Object.values(categoryTotals);
+  
+  // Get all unique entities present in current expenses
+  const entitiesList = [...new Set(expenses.map(e => e.entity))];
+  
+  // Build a dataset for each entity representing its spending in each category
+  const categoryDatasets = entitiesList.map(ent => {
+    const config = ENTITY_CONFIG[ent] || { fullName: ent, color: '#94a3b8' };
+    return {
+      label: ent,
+      data: categoryLabels.map(cat => {
+        let sum = 0;
+        expenses.forEach(exp => {
+          // Keep charts in sync with active search filters
+          const searchInput = document.getElementById('table-search');
+          const searchQuery = searchInput ? searchInput.value.toLowerCase() : '';
+          
+          const matchesSearch = 
+            exp.name.toLowerCase().includes(searchQuery) ||
+            (exp.email && exp.email.toLowerCase().includes(searchQuery)) ||
+            (exp.details && exp.details.toLowerCase().includes(searchQuery));
+
+          const matchesEntity = (activeEntityFilter === 'all' || exp.entity === activeEntityFilter);
+          
+          const catFilter = document.getElementById('category-filter');
+          const categoryFilter = catFilter ? catFilter.value : 'all';
+          const matchesCategory = (categoryFilter === 'all' || exp.category === categoryFilter);
+
+          if (matchesSearch && matchesEntity && matchesCategory) {
+            if (exp.entity === ent && exp.category === cat) {
+              sum += getBDTValue(exp);
+            }
+          }
+        });
+        return sum;
+      }),
+      backgroundColor: config.color,
+      borderColor: config.color,
+      borderWidth: 0,
+      borderRadius: 4
+    };
+  });
 
   if (categoryChart) categoryChart.destroy();
 
@@ -620,24 +660,19 @@ function renderCharts() {
     type: 'bar',
     data: {
       labels: categoryLabels,
-      datasets: [{
-        label: 'Expenses (TK)',
-        data: categoryData,
-        backgroundColor: 'rgba(161, 140, 209, 0.45)',
-        borderColor: '#a18cd1',
-        borderWidth: 2,
-        borderRadius: 8
-      }]
+      datasets: categoryDatasets
     },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       scales: {
         x: {
-          ticks: { color: textColor, font: { family: 'Inter' } },
+          stacked: true,
+          ticks: { color: textColor, font: { family: 'Inter', weight: 500 } },
           grid: { color: gridColor }
         },
         y: {
+          stacked: true,
           ticks: { 
             color: textColor, 
             font: { family: 'Inter' },
@@ -647,11 +682,15 @@ function renderCharts() {
         }
       },
       plugins: {
-        legend: { display: false },
+        legend: {
+          display: true,
+          position: 'top',
+          labels: { color: textColor, font: { family: 'Inter', weight: 600 } }
+        },
         tooltip: {
           callbacks: {
             label: function(context) {
-              return ` Total: ${Math.round(context.raw).toLocaleString()} TK`;
+              return ` ${context.dataset.label}: ${Math.round(context.raw).toLocaleString()} TK`;
             }
           }
         }
