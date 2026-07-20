@@ -37,6 +37,12 @@ let settings = { usd_to_bdt: 120, eur_to_bdt: 130 };
 let activeEntityFilter = 'all';
 let viewMode = 'monthly'; // 'monthly' or 'daily'
 
+// Config for cross-origin hosting (e.g. Netlify). Set to your Render URL.
+const API_URL = ""; 
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? ''
+  : API_URL;
+
 // Chart instances
 let entityChart = null;
 let categoryChart = null;
@@ -98,7 +104,7 @@ function initNavigation() {
 // ==========================================================================
 async function fetchSettings() {
   try {
-    const res = await fetch('/api/settings');
+    const res = await fetch(`${API_BASE}/api/settings`);
     if (!res.ok) throw new Error("Failed to load settings");
     settings = await res.json();
     updateSettingsDisplay();
@@ -110,7 +116,7 @@ async function fetchSettings() {
 
 async function fetchExpenses() {
   try {
-    const res = await fetch('/api/expenses');
+    const res = await fetch(`${API_BASE}/api/expenses`);
     if (!res.ok) throw new Error("Failed to load expenses");
     expenses = await res.json();
     calculateMetrics();
@@ -133,7 +139,7 @@ async function saveSettings(e) {
   }
 
   try {
-    const res = await fetch('/api/settings', {
+    const res = await fetch(`${API_BASE}/api/settings`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ usd_to_bdt: rateUSD, eur_to_bdt: rateEUR })
@@ -658,7 +664,7 @@ async function saveExpense(e) {
   };
 
   const isEdit = !!id;
-  const url = isEdit ? `/api/expenses/${id}` : '/api/expenses';
+  const url = isEdit ? `${API_BASE}/api/expenses/${id}` : `${API_BASE}/api/expenses`;
   const method = isEdit ? 'PUT' : 'POST';
 
   try {
@@ -687,7 +693,7 @@ async function deleteExpense(id) {
   if (!confirm("Are you sure you want to delete this expense item?")) return;
 
   try {
-    const res = await fetch(`/api/expenses/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_BASE}/api/expenses/${id}`, { method: 'DELETE' });
     if (!res.ok) throw new Error("Failed to delete item");
     showToast("Expense item deleted", "success");
     fetchExpenses();
