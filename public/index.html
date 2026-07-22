@@ -155,10 +155,16 @@
             <h1>Expense Manager</h1>
             <p>View, search, edit and register new monthly subscription items.</p>
           </div>
-          <button class="btn btn-primary" id="add-expense-btn" onclick="openExpenseModal()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add New Item
-          </button>
+          <div style="display: flex; gap: 0.75rem;">
+            <button class="btn btn-secondary" id="manage-categories-btn" onclick="openCategoryManagerModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Manage Categories
+            </button>
+            <button class="btn btn-primary" id="add-expense-btn" onclick="openExpenseModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add New Item
+            </button>
+          </div>
         </div>
 
         <!-- Filters Toolbar -->
@@ -460,6 +466,28 @@ Please find below the consolidated monthly subscription expenses (AI accounts, S
           <button type="submit" class="btn btn-primary">Update Rates</button>
         </div>
       </form>
+    </div>
+  </div>
+
+  <!-- MODAL: CATEGORY MANAGER -->
+  <div class="modal-backdrop" id="category-manager-modal">
+    <div class="modal glass-panel modal-sm">
+      <div class="modal-header">
+        <h3>Manage Categories</h3>
+        <button class="modal-close-btn" onclick="closeCategoryManagerModal()">×</button>
+      </div>
+      <div class="modal-body" style="padding: 1.5rem;">
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 1rem;">
+          <input type="text" id="new-cat-mgr-input" placeholder="New category name" style="flex: 1; border-radius: 6px; border: 1px solid var(--border-glass); background: var(--bg-card); color: var(--text-main); padding: 0.5rem;" onkeypress="if(event.key === 'Enter') saveNewCategoryFromManager()">
+          <button class="btn btn-primary" onclick="saveNewCategoryFromManager()">Add</button>
+        </div>
+        <div id="category-manager-list" style="max-height: 250px; overflow-y: auto; border: 1px solid var(--border-glass); border-radius: 6px; padding: 0.5rem; background: var(--bg-card);">
+          <!-- dynamically populated -->
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn btn-secondary" onclick="closeCategoryManagerModal()">Close</button>
+      </div>
     </div>
   </div>
 

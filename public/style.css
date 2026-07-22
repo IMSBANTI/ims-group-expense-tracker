@@ -1057,7 +1057,8 @@ tr:hover td {
 
 #new-company-modal,
 #new-category-modal,
-#settings-modal {
+#settings-modal,
+#category-manager-modal {
   z-index: 1100 !important;
 }
 
