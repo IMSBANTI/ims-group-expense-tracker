@@ -1273,17 +1273,22 @@ function escapeHTML(str) {
 // DYNAMIC CATEGORIES & ENTITIES MANAGEMENT
 // ==========================================================================
 async function fetchCategories() {
+  const savedCats = localStorage.getItem('customCategories');
+  if (savedCats) {
+    try { customCategoriesList = JSON.parse(savedCats); } catch(e){}
+  }
   try {
     if (isReadOnly) {
       const res = await fetch('db.json');
       if (res.ok) {
         const data = await res.json();
-        if (data.customCategories) customCategoriesList = data.customCategories;
+        if (data.customCategories && !savedCats) customCategoriesList = data.customCategories;
       }
     } else {
       const res = await fetch(`${API_BASE}/api/categories`);
       if (res.ok) {
-        customCategoriesList = await res.json();
+        const remoteCats = await res.json();
+        if (Array.isArray(remoteCats)) customCategoriesList = remoteCats;
       }
     }
   } catch (err) {
@@ -1459,21 +1464,29 @@ function renderCategoryManagerList() {
 async function deleteCategory(categoryName) {
   if (!confirm(`Are you sure you want to remove category "${categoryName}"?`)) return;
 
+  // Optimistic instant UI update
+  customCategoriesList = customCategoriesList.filter(c => c.toLowerCase() !== categoryName.toLowerCase());
+  localStorage.setItem('customCategories', JSON.stringify(customCategoriesList));
+
+  populateCategoryDropdowns();
+  renderCategoryManagerList();
+  showToast(`Category "${categoryName}" removed successfully`, 'success');
+
   try {
     const res = await fetch(`${API_BASE}/api/categories/${encodeURIComponent(categoryName)}`, {
       method: 'DELETE'
     });
-
-    if (!res.ok) throw new Error("Failed to delete category");
-    const data = await res.json();
-    customCategoriesList = data.categories || [];
-
-    populateCategoryDropdowns();
-    renderCategoryManagerList();
-    showToast(`Category "${categoryName}" removed successfully`, 'success');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.categories) {
+        customCategoriesList = data.categories;
+        localStorage.setItem('customCategories', JSON.stringify(customCategoriesList));
+        populateCategoryDropdowns();
+        renderCategoryManagerList();
+      }
+    }
   } catch (err) {
-    showToast("Error deleting category", "error");
-    console.error(err);
+    console.error("Backend delete sync skipped or failed:", err);
   }
 }
 
@@ -1483,23 +1496,32 @@ async function saveNewCategoryFromManager() {
   const name = inputEl.value.trim();
   if (!name) return;
 
+  if (!customCategoriesList.some(c => c.toLowerCase() === name.toLowerCase())) {
+    customCategoriesList.push(name);
+    localStorage.setItem('customCategories', JSON.stringify(customCategoriesList));
+  }
+
+  populateCategoryDropdowns();
+  renderCategoryManagerList();
+  inputEl.value = '';
+  showToast(`New category "${name}" added successfully`, 'success');
+
   try {
     const res = await fetch(`${API_BASE}/api/categories`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ name })
     });
-
-    if (!res.ok) throw new Error("Failed to save category");
-    const data = await res.json();
-    customCategoriesList = data.categories || [];
-
-    populateCategoryDropdowns();
-    renderCategoryManagerList();
-    inputEl.value = '';
-    showToast(`New category "${name}" added successfully`, 'success');
+    if (res.ok) {
+      const data = await res.json();
+      if (data.categories) {
+        customCategoriesList = data.categories;
+        localStorage.setItem('customCategories', JSON.stringify(customCategoriesList));
+        populateCategoryDropdowns();
+        renderCategoryManagerList();
+      }
+    }
   } catch (err) {
-    showToast("Error adding category", "error");
-    console.error(err);
+    console.error("Backend add category sync skipped or failed:", err);
   }
 }
