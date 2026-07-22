@@ -1424,21 +1424,11 @@ async function saveNewCompany(e) {
   }
 }
 
-function openNewCategoryModal() {
-  document.getElementById('new-category-form').reset();
-  document.getElementById('new-category-modal').classList.add('active');
-}
-function closeNewCategoryModal() {
-  document.getElementById('new-category-modal').classList.remove('active');
-}
+async function openNewCategoryModal() {
+  const categoryInput = prompt("Enter new category name (e.g. Hosting, Domain, Hardware, Marketing):");
+  if (!categoryInput || !categoryInput.trim()) return;
 
-async function saveNewCategory(e) {
-  e.preventDefault();
-  const inputEl = document.getElementById('new-category-name');
-  if (!inputEl) return;
-  const name = inputEl.value.trim();
-  if (!name) return;
-
+  const name = categoryInput.trim();
   try {
     const res = await fetch(`${API_BASE}/api/categories`, {
       method: 'POST',
@@ -1451,7 +1441,6 @@ async function saveNewCategory(e) {
     customCategoriesList = data.categories || [];
 
     populateCategoryDropdowns();
-    closeNewCategoryModal();
     showToast(`New category "${name}" added successfully`, 'success');
   } catch (err) {
     showToast("Error adding category", "error");
