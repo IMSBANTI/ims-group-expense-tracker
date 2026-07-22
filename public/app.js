@@ -52,7 +52,7 @@ let categoryChart = null;
 // ==========================================================================
 // INITIALIZATION
 // ==========================================================================
-let customCategoriesList = ["Monthly AI", "Software", "Internet", "Mail"];
+let customCategoriesList = ["Monthly AI", "Software", "Internet", "Mail", "Domain"];
 let customEntitiesList = [
   { code: "IMS", fullName: "Integrated Marketing Service Ltd.", color: "#ef4444", logo: "/assets/ims_logo.png" },
   { code: "CLAN", fullName: "Country's Largest Audience Network", color: "#f97316", logo: "/assets/clan_logo.png" },
@@ -1303,7 +1303,7 @@ function escapeHTML(str) {
 // DYNAMIC CATEGORIES & ENTITIES MANAGEMENT
 // ==========================================================================
 async function fetchCategories() {
-  customCategoriesList = ["Monthly AI", "Software", "Internet", "Mail"];
+  customCategoriesList = ["Monthly AI", "Software", "Internet", "Mail", "Domain"];
   try {
     if (isReadOnly) {
       const res = await fetch('db.json');
