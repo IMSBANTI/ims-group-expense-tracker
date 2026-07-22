@@ -241,7 +241,7 @@ app.put('/api/expenses/:id', (req, res) => {
   const id = req.params.id;
   const monthKey = req.query.month || req.body.month || (new Date().toISOString().substring(0, 7));
   const expensesList = getExpensesForMonth(db, monthKey);
-  const index = expensesList.findIndex(e => e.id === id);
+  const index = expensesList.findIndex(e => String(e.id) === String(id));
 
   if (index === -1) {
     return res.status(404).json({ error: "Expense not found for this month" });
@@ -291,7 +291,7 @@ app.delete('/api/expenses/:id', (req, res) => {
   const id = req.params.id;
   const monthKey = req.query.month || (new Date().toISOString().substring(0, 7));
   const expensesList = getExpensesForMonth(db, monthKey);
-  const index = expensesList.findIndex(e => e.id === id);
+  const index = expensesList.findIndex(e => String(e.id) === String(id));
 
   if (index === -1) {
     return res.status(404).json({ error: "Expense not found for this month" });
