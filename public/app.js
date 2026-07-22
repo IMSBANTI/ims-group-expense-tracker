@@ -1433,6 +1433,59 @@ async function saveNewCompany(e) {
     showToast("Error adding company", "error");
     console.error(err);
   }
+function toggleInlineCategoryBox(show = null) {
+  const box = document.getElementById('inline-category-box');
+  const input = document.getElementById('inline-category-name');
+  if (!box) return;
+
+  if (show === false || (!box.classList.contains('hidden') && show === null)) {
+    box.classList.add('hidden');
+    if (input) input.value = '';
+  } else {
+    box.classList.remove('hidden');
+    if (input) {
+      input.value = '';
+      input.focus();
+    }
+  }
+}
+
+async function submitInlineCategory() {
+  const input = document.getElementById('inline-category-name');
+  if (!input) return;
+  const name = input.value.trim();
+
+  if (!name) {
+    showToast("Please enter a category name", "error");
+    return;
+  }
+
+  if (!customCategoriesList.some(c => c.toLowerCase() === name.toLowerCase())) {
+    customCategoriesList.push(name);
+    localStorage.setItem('customCategories', JSON.stringify(customCategoriesList));
+  }
+
+  populateCategoryDropdowns();
+  toggleInlineCategoryBox(false);
+  showToast(`New category "${name}" added successfully`, 'success');
+
+  try {
+    const res = await fetch(`${API_BASE}/api/categories`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+    if (res.ok) {
+      const data = await res.json();
+      if (data.categories) {
+        customCategoriesList = data.categories;
+        localStorage.setItem('customCategories', JSON.stringify(customCategoriesList));
+        populateCategoryDropdowns();
+      }
+    }
+  } catch (err) {
+    console.error("Backend category sync error:", err);
+  }
 }
 
 function openCategoryManagerModal() {
