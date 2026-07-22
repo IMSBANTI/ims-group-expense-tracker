@@ -1273,34 +1273,23 @@ function escapeHTML(str) {
 // DYNAMIC CATEGORIES & ENTITIES MANAGEMENT
 // ==========================================================================
 async function fetchCategories() {
-  const savedCats = localStorage.getItem('customCategories');
-  if (savedCats) {
-    try { 
-      customCategoriesList = JSON.parse(savedCats);
-      customCategoriesList = customCategoriesList.filter(c => c.toLowerCase() !== 'book');
-      localStorage.setItem('customCategories', JSON.stringify(customCategoriesList));
-    } catch(e){}
-  }
+  customCategoriesList = ["Monthly AI", "Software", "Internet", "Mail"];
   try {
     if (isReadOnly) {
       const res = await fetch('db.json');
       if (res.ok) {
         const data = await res.json();
-        if (data.customCategories && !savedCats) customCategoriesList = data.customCategories;
+        if (data.customCategories && Array.isArray(data.customCategories)) {
+          customCategoriesList = data.customCategories;
+        }
       }
     } else {
       const res = await fetch(`${API_BASE}/api/categories`);
       if (res.ok) {
         const remoteCats = await res.json();
-        if (Array.isArray(remoteCats)) customCategoriesList = remoteCats;
+        if (Array.isArray(remoteCats) && remoteCats.length > 0) customCategoriesList = remoteCats;
       }
     }
-    const defaultRequired = ["Monthly AI", "Software", "Internet", "Mail", "Hosting", "Domain", "Hardware", "Marketing"];
-    defaultRequired.forEach(c => {
-      if (!customCategoriesList.includes(c)) customCategoriesList.push(c);
-    });
-    customCategoriesList = customCategoriesList.filter(c => c.toLowerCase() !== 'book');
-    localStorage.setItem('customCategories', JSON.stringify(customCategoriesList));
   } catch (err) {
     console.error("Error fetching categories:", err);
   } finally {
