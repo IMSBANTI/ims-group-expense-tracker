@@ -1234,36 +1234,52 @@ function escapeHTML(str) {
 // DYNAMIC CATEGORIES & ENTITIES MANAGEMENT
 // ==========================================================================
 async function fetchCategories() {
-  if (isReadOnly) return;
   try {
-    const res = await fetch(`${API_BASE}/api/categories`);
-    if (res.ok) {
-      customCategoriesList = await res.json();
-      populateCategoryDropdowns();
+    if (isReadOnly) {
+      const res = await fetch('db.json');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.customCategories) customCategoriesList = data.customCategories;
+      }
+    } else {
+      const res = await fetch(`${API_BASE}/api/categories`);
+      if (res.ok) {
+        customCategoriesList = await res.json();
+      }
     }
   } catch (err) {
     console.error("Error fetching categories:", err);
+  } finally {
+    populateCategoryDropdowns();
   }
 }
 
 async function fetchEntities() {
-  if (isReadOnly) return;
   try {
-    const res = await fetch(`${API_BASE}/api/entities`);
-    if (res.ok) {
-      customEntitiesList = await res.json();
-      customEntitiesList.forEach(e => {
-        ENTITY_CONFIG[e.code] = {
-          fullName: e.fullName,
-          logo: e.logo || '',
-          color: e.color || '#3b82f6',
-          class: `badge-entity-${e.code.toLowerCase()}`
-        };
-      });
-      populateEntityDropdowns();
+    if (isReadOnly) {
+      const res = await fetch('db.json');
+      if (res.ok) {
+        const data = await res.json();
+        if (data.customEntities) customEntitiesList = data.customEntities;
+      }
+    } else {
+      const res = await fetch(`${API_BASE}/api/entities`);
+      if (res.ok) {
+        customEntitiesList = await res.json();
+      }
     }
+    customEntitiesList.forEach(e => {
+      ENTITY_CONFIG[e.code] = {
+        fullName: e.fullName,
+        logo: e.logo || '',
+        color: e.color || '#3b82f6',
+        class: `badge-entity-${e.code.toLowerCase()}`
+      };
+    });
   } catch (err) {
     console.error("Error fetching entities:", err);
+  } finally {
+    populateEntityDropdowns();
   }
 }
 
