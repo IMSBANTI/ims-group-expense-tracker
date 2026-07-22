@@ -1453,6 +1453,7 @@ async function saveNewCompany(e) {
     showToast("Error adding company", "error");
     console.error(err);
   }
+}
 function toggleInlineCategoryBox(show = null) {
   const box = document.getElementById('inline-category-box');
   const input = document.getElementById('inline-category-name');
