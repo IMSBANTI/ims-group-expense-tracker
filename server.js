@@ -174,22 +174,16 @@ function getExpensesForMonth(db, monthKey) {
     db.monthlyData = {};
   }
 
-  // Migration: If db.expenses exists and monthlyData is empty, populate current month
-  if (Object.keys(db.monthlyData).length === 0 && db.expenses && db.expenses.length > 0) {
-    const curMonth = new Date().toISOString().substring(0, 7);
-    db.monthlyData[curMonth] = db.expenses;
-  }
-
-  // If data exists for monthKey, return it
-  if (db.monthlyData[monthKey] && Array.isArray(db.monthlyData[monthKey])) {
+  // If data exists for monthKey AND has items, return it
+  if (db.monthlyData[monthKey] && Array.isArray(db.monthlyData[monthKey]) && db.monthlyData[monthKey].length > 0) {
     return db.monthlyData[monthKey];
   }
 
-  // If no data exists for monthKey, clone from closest existing month or db.expenses
-  const existingMonths = Object.keys(db.monthlyData).sort();
+  // If no data exists for monthKey or array is empty, clone from closest non-empty month or db.expenses
+  const nonExistingMonths = Object.keys(db.monthlyData).filter(m => Array.isArray(db.monthlyData[m]) && db.monthlyData[m].length > 0).sort();
   let baseList = db.expenses || [];
-  if (existingMonths.length > 0) {
-    const lastMonth = existingMonths[existingMonths.length - 1];
+  if (nonExistingMonths.length > 0) {
+    const lastMonth = nonExistingMonths[nonExistingMonths.length - 1];
     baseList = db.monthlyData[lastMonth];
   }
 
