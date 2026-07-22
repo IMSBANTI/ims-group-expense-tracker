@@ -52,7 +52,7 @@ let categoryChart = null;
 // ==========================================================================
 // INITIALIZATION
 // ==========================================================================
-let customCategoriesList = ["Monthly AI", "Software", "Internet", "Mail", "Hosting", "Domain", "Hardware", "Marketing"];
+let customCategoriesList = ["Monthly AI", "Software", "Internet", "Mail"];
 let customEntitiesList = [
   { code: "IMS", fullName: "Integrated Marketing Service Ltd.", color: "#ef4444", logo: "/assets/ims_logo.png" },
   { code: "CLAN", fullName: "Country's Largest Audience Network", color: "#f97316", logo: "/assets/clan_logo.png" },
@@ -212,29 +212,56 @@ async function fetchSettings() {
 
 async function fetchExpenses() {
   try {
+    let loadedData = false;
     if (isReadOnly) {
       const res = await fetch('db.json');
-      if (!res.ok) throw new Error("Failed to load static database file");
-      const data = await res.json();
-      if (data.monthlyData && data.monthlyData[activeMonth]) {
-        expenses = data.monthlyData[activeMonth];
-      } else if (data.monthlyData) {
-        const months = Object.keys(data.monthlyData).sort();
-        if (months.length > 0) {
-          expenses = data.monthlyData[months[months.length - 1]];
+      if (res.ok) {
+        const data = await res.json();
+        if (data.monthlyData && data.monthlyData[activeMonth] && data.monthlyData[activeMonth].length > 0) {
+          expenses = data.monthlyData[activeMonth];
         } else {
           expenses = data.expenses || [];
         }
-      } else {
-        expenses = data.expenses || [];
+        settings = data.settings || { usd_to_bdt: 120, eur_to_bdt: 130 };
+        updateSettingsDisplay();
+        loadedData = true;
       }
-      settings = data.settings || { usd_to_bdt: 120, eur_to_bdt: 130 };
-      updateSettingsDisplay();
     } else {
-      const res = await fetch(`${API_BASE}/api/expenses?month=${activeMonth}`);
-      if (!res.ok) throw new Error("Failed to load expenses");
-      expenses = await res.json();
+      try {
+        const res = await fetch(`${API_BASE}/api/expenses?month=${activeMonth}`);
+        if (res.ok) {
+          expenses = await res.json();
+          if (Array.isArray(expenses) && expenses.length > 0) {
+            loadedData = true;
+          }
+        }
+      } catch (apiErr) {
+        console.warn("API fetch failed, trying static fallback:", apiErr);
+      }
+
+      // Fallback if API fails or returns empty array
+      if (!loadedData) {
+        try {
+          const res = await fetch('db.json');
+          if (res.ok) {
+            const data = await res.json();
+            if (data.monthlyData && data.monthlyData[activeMonth] && data.monthlyData[activeMonth].length > 0) {
+              expenses = data.monthlyData[activeMonth];
+            } else {
+              expenses = data.expenses || [];
+            }
+            if (data.settings) {
+              settings = data.settings;
+              updateSettingsDisplay();
+            }
+            loadedData = true;
+          }
+        } catch (dbErr) {
+          console.error("Fallback to db.json failed:", dbErr);
+        }
+      }
     }
+
     calculateMetrics();
     populateTable();
     renderCharts();
