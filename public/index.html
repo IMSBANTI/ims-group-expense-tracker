@@ -348,6 +348,26 @@ Please find below the consolidated monthly subscription expenses (AI accounts, S
           </div>
         </div>
 
+        <!-- Per-User Seat Calculator Block -->
+        <div class="form-group" style="background: rgba(255, 255, 255, 0.03); padding: 0.85rem; border-radius: 8px; border: 1px dashed var(--border-glass); margin-bottom: 1rem;">
+          <div style="display: flex; align-items: center; justify-content: space-between;">
+            <label for="field-is-per-user" style="font-weight: 700; cursor: pointer; display: flex; align-items: center; gap: 0.5rem; margin: 0;">
+              <input type="checkbox" id="field-is-per-user" onchange="toggleSeatCalculator()"> 
+              Per-User / Seat Based Billing (e.g. Workspace Mail)
+            </label>
+          </div>
+          <div id="seat-calc-inputs" class="hidden" style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-top: 0.75rem;">
+            <div class="form-group" style="margin: 0;">
+              <label for="field-user-count">Number of Seats / Users</label>
+              <input type="number" id="field-user-count" placeholder="e.g. 28" min="1" oninput="calculateSeatTotal()">
+            </div>
+            <div class="form-group" style="margin: 0;">
+              <label for="field-cost-per-user">Cost per Seat / User</label>
+              <input type="number" id="field-cost-per-user" step="any" placeholder="e.g. 10.71" oninput="calculateSeatTotal()">
+            </div>
+          </div>
+        </div>
+
         <div class="form-row">
           <div class="form-group">
             <label for="field-price">Price / Cost *</label>

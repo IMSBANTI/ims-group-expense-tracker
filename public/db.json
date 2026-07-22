@@ -382,7 +382,7 @@
       "id": "28",
       "entity": "CLAN",
       "category": "Mail",
-      "name": "Google Workspace (28 Users)",
+      "name": "Google Workspace",
       "email": "admin@clan.com.bd",
       "price": 300,
       "currency": "USD",
@@ -390,13 +390,16 @@
       "extraCreditCost": 0,
       "details": "Mail Workspace for 28 users (12+8+7+2)",
       "billingFrequency": "monthly",
-      "extraBillingFrequency": "monthly"
+      "extraBillingFrequency": "monthly",
+      "isPerUser": true,
+      "userCount": 28,
+      "costPerUser": 10.71
     },
     {
       "id": "29",
       "entity": "SCL",
       "category": "Mail",
-      "name": "Google Workspace (11 Users)",
+      "name": "Google Workspace",
       "email": "",
       "price": 102,
       "currency": "USD",
@@ -404,7 +407,10 @@
       "extraCreditCost": 0,
       "details": "Mail Workspace for 11 users",
       "billingFrequency": "monthly",
-      "extraBillingFrequency": "monthly"
+      "extraBillingFrequency": "monthly",
+      "isPerUser": true,
+      "userCount": 11,
+      "costPerUser": 9.27
     }
   ]
 }

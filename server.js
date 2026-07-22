@@ -78,7 +78,7 @@ app.get('/api/expenses', (req, res) => {
 // POST Expense
 app.post('/api/expenses', (req, res) => {
   const db = readDB();
-  const { entity, category, name, email, price, currency, dueDate, extraCreditCost, details, billingFrequency, extraBillingFrequency } = req.body;
+  const { entity, category, name, email, price, currency, dueDate, extraCreditCost, details, billingFrequency, extraBillingFrequency, isPerUser, userCount, costPerUser } = req.body;
 
   if (!entity || !category || !name || price === undefined || !currency) {
     return res.status(400).json({ error: "Missing required fields (entity, category, name, price, currency)" });
@@ -101,7 +101,10 @@ app.post('/api/expenses', (req, res) => {
     extraCreditCost: parseFloat(extraCreditCost || 0),
     details: details || "",
     billingFrequency: billingFrequency || "monthly",
-    extraBillingFrequency: extraBillingFrequency || "monthly"
+    extraBillingFrequency: extraBillingFrequency || "monthly",
+    isPerUser: !!isPerUser,
+    userCount: parseInt(userCount || 0),
+    costPerUser: parseFloat(costPerUser || 0)
   };
 
   db.expenses.push(newExpense);
@@ -123,7 +126,7 @@ app.put('/api/expenses/:id', (req, res) => {
     return res.status(404).json({ error: "Expense not found" });
   }
 
-  const { entity, category, name, email, price, currency, dueDate, extraCreditCost, details, billingFrequency, extraBillingFrequency } = req.body;
+  const { entity, category, name, email, price, currency, dueDate, extraCreditCost, details, billingFrequency, extraBillingFrequency, isPerUser, userCount, costPerUser } = req.body;
 
   if (!entity || !category || !name || price === undefined || !currency) {
     return res.status(400).json({ error: "Missing required fields (entity, category, name, price, currency)" });
@@ -146,7 +149,10 @@ app.put('/api/expenses/:id', (req, res) => {
     extraCreditCost: parseFloat(extraCreditCost || 0),
     details: details || "",
     billingFrequency: billingFrequency || "monthly",
-    extraBillingFrequency: extraBillingFrequency || "monthly"
+    extraBillingFrequency: extraBillingFrequency || "monthly",
+    isPerUser: !!isPerUser,
+    userCount: parseInt(userCount || 0),
+    costPerUser: parseFloat(costPerUser || 0)
   };
 
   if (writeDB(db)) {

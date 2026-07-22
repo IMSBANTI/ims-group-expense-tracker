@@ -490,10 +490,16 @@ function populateTable() {
       `;
     }
 
+    let userSeatBadge = '';
+    if (exp.isPerUser && exp.userCount > 0) {
+      const symbol = exp.currency === 'USD' ? '$' : (exp.currency === 'EUR' ? '€' : '');
+      userSeatBadge = `<br><span style="font-size:0.75rem; color:var(--color-primary); font-weight:600;">(${exp.userCount} Seats @ ${symbol}${exp.costPerUser}/user)</span>`;
+    }
+
     tr.innerHTML = `
       <td>${entityLogoHTML}</td>
       <td><span class="badge badge-category">${exp.category}</span></td>
-      <td class="font-weight-bold">${escapeHTML(exp.name)}</td>
+      <td class="font-weight-bold">${escapeHTML(exp.name)}${userSeatBadge}</td>
       <td class="text-email">${exp.email ? escapeHTML(exp.email) : '-'}</td>
       <td><span class="price-bold">${originalCostStr}</span> <span class="badge-currency">${exp.currency}</span></td>
       <td class="text-muted font-size-xs">${extraCostStr}</td>
@@ -702,6 +708,30 @@ function renderCharts() {
 // ==========================================================================
 // CRUD OPERATIONS (FORMS & ACTIONS)
 // ==========================================================================
+function toggleSeatCalculator() {
+  const isChecked = document.getElementById('field-is-per-user').checked;
+  const container = document.getElementById('seat-calc-inputs');
+  if (isChecked) {
+    container.classList.remove('hidden');
+    calculateSeatTotal();
+  } else {
+    container.classList.add('hidden');
+  }
+}
+
+function calculateSeatTotal() {
+  const isChecked = document.getElementById('field-is-per-user').checked;
+  if (!isChecked) return;
+
+  const count = parseFloat(document.getElementById('field-user-count').value || 0);
+  const cost = parseFloat(document.getElementById('field-cost-per-user').value || 0);
+
+  if (count > 0 && cost > 0) {
+    const total = count * cost;
+    document.getElementById('field-price').value = Math.round(total * 100) / 100;
+  }
+}
+
 function openExpenseModal(editId = null) {
   const modal = document.getElementById('expense-modal');
   const form = document.getElementById('expense-form');
@@ -710,6 +740,10 @@ function openExpenseModal(editId = null) {
 
   form.reset();
   document.getElementById('field-id').value = '';
+  document.getElementById('field-is-per-user').checked = false;
+  document.getElementById('field-user-count').value = '';
+  document.getElementById('field-cost-per-user').value = '';
+  document.getElementById('seat-calc-inputs').classList.add('hidden');
 
   if (editId) {
     const exp = expenses.find(e => e.id === editId);
@@ -730,6 +764,13 @@ function openExpenseModal(editId = null) {
     document.getElementById('field-details').value = exp.details || '';
     document.getElementById('field-billing-frequency').value = exp.billingFrequency || 'monthly';
     document.getElementById('field-extra-billing-frequency').value = exp.extraBillingFrequency || 'monthly';
+
+    if (exp.isPerUser) {
+      document.getElementById('field-is-per-user').checked = true;
+      document.getElementById('field-user-count').value = exp.userCount || '';
+      document.getElementById('field-cost-per-user').value = exp.costPerUser || '';
+      document.getElementById('seat-calc-inputs').classList.remove('hidden');
+    }
   } else {
     title.textContent = "Add Subscription / Expense Item";
     saveBtn.textContent = "Register Expense";
@@ -759,7 +800,10 @@ async function saveExpense(e) {
     dueDate: document.getElementById('field-due-date').value,
     details: document.getElementById('field-details').value,
     billingFrequency: document.getElementById('field-billing-frequency').value,
-    extraBillingFrequency: document.getElementById('field-extra-billing-frequency').value
+    extraBillingFrequency: document.getElementById('field-extra-billing-frequency').value,
+    isPerUser: document.getElementById('field-is-per-user').checked,
+    userCount: parseInt(document.getElementById('field-user-count').value || 0),
+    costPerUser: parseFloat(document.getElementById('field-cost-per-user').value || 0)
   };
 
   const isEdit = !!id;
@@ -972,10 +1016,16 @@ function generateReport() {
         }
       }
 
+      let itemNameWithSeats = escapeHTML(exp.name);
+      if (exp.isPerUser && exp.userCount > 0) {
+        const symbol = exp.currency === 'USD' ? '$' : (exp.currency === 'EUR' ? '€' : '');
+        itemNameWithSeats += `<br><span style="font-size: 8.5pt; color: #0284c7;">(${exp.userCount} Seats @ ${symbol}${exp.costPerUser}/user)</span>`;
+      }
+
       html += `
         <tr>
           <td style="border-bottom: 1px solid #f1f5f9; color: #64748b;">${exp.category}</td>
-          <td style="border-bottom: 1px solid #f1f5f9; font-weight: 500;">${escapeHTML(exp.name)}</td>
+          <td style="border-bottom: 1px solid #f1f5f9; font-weight: 500;">${itemNameWithSeats}</td>
           <td style="border-bottom: 1px solid #f1f5f9; color: #475569; font-size: 9.5pt;">${exp.email ? escapeHTML(exp.email) : '-'}</td>
           <td align="right" style="border-bottom: 1px solid #f1f5f9; font-family: monospace;">${originalCostStr}</td>
           <td align="right" style="border-bottom: 1px solid #f1f5f9; color: #64748b; font-family: monospace;">${extraCostStr}</td>
