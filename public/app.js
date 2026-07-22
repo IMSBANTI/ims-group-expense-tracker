@@ -36,6 +36,7 @@ let expenses = [];
 let settings = { usd_to_bdt: 120, eur_to_bdt: 130 };
 let activeEntityFilter = 'all';
 let viewMode = 'monthly'; // 'monthly' or 'daily'
+let activeMonth = new Date().toISOString().substring(0, 7); // e.g. "2026-07"
 const isReadOnly = false; // Set to false to enable full live editing on Render.com
 
 // Config for cross-origin hosting (e.g. Netlify). Set to your Render URL.
@@ -77,6 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
 function updateActiveBillingMonth(yearMonthStr, showToastNotice = true) {
   if (!yearMonthStr) return;
   
+  const isMonthChange = (activeMonth !== yearMonthStr);
+  activeMonth = yearMonthStr;
+
   const [year, month] = yearMonthStr.split('-');
   const dateObj = new Date(parseInt(year), parseInt(month) - 1, 1);
   const formattedMonth = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
@@ -96,6 +100,10 @@ function updateActiveBillingMonth(yearMonthStr, showToastNotice = true) {
     reportMonthInput.value = yearMonthStr;
   }
   
+  if (isMonthChange) {
+    fetchExpenses();
+  }
+
   if (showToastNotice) {
     showToast(`Active expense period set to ${formattedMonth}`, 'info');
   }
@@ -198,11 +206,22 @@ async function fetchExpenses() {
       const res = await fetch('db.json');
       if (!res.ok) throw new Error("Failed to load static database file");
       const data = await res.json();
-      expenses = data.expenses || [];
+      if (data.monthlyData && data.monthlyData[activeMonth]) {
+        expenses = data.monthlyData[activeMonth];
+      } else if (data.monthlyData) {
+        const months = Object.keys(data.monthlyData).sort();
+        if (months.length > 0) {
+          expenses = data.monthlyData[months[months.length - 1]];
+        } else {
+          expenses = data.expenses || [];
+        }
+      } else {
+        expenses = data.expenses || [];
+      }
       settings = data.settings || { usd_to_bdt: 120, eur_to_bdt: 130 };
       updateSettingsDisplay();
     } else {
-      const res = await fetch(`${API_BASE}/api/expenses`);
+      const res = await fetch(`${API_BASE}/api/expenses?month=${activeMonth}`);
       if (!res.ok) throw new Error("Failed to load expenses");
       expenses = await res.json();
     }
@@ -841,7 +860,7 @@ async function saveExpense(e) {
   };
 
   const isEdit = !!id;
-  const url = isEdit ? `${API_BASE}/api/expenses/${id}` : `${API_BASE}/api/expenses`;
+  const url = isEdit ? `${API_BASE}/api/expenses/${id}?month=${activeMonth}` : `${API_BASE}/api/expenses?month=${activeMonth}`;
   const method = isEdit ? 'PUT' : 'POST';
 
   try {
@@ -870,7 +889,7 @@ async function deleteExpense(id) {
   if (!confirm("Are you sure you want to delete this expense item?")) return;
 
   try {
-    const res = await fetch(`${API_BASE}/api/expenses/${id}`, { method: 'DELETE' });
+    const res = await fetch(`${API_BASE}/api/expenses/${id}?month=${activeMonth}`, { method: 'DELETE' });
     if (!res.ok) throw new Error("Failed to delete item");
     showToast("Expense item deleted", "success");
     fetchExpenses();

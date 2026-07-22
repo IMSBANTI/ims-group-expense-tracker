@@ -69,15 +69,52 @@ app.post('/api/settings', (req, res) => {
   }
 });
 
+// Helper to get or clone expenses for a specific month
+function getExpensesForMonth(db, monthKey) {
+  if (!db.monthlyData) {
+    db.monthlyData = {};
+  }
+
+  // Migration: If db.expenses exists and monthlyData is empty, populate current month
+  if (Object.keys(db.monthlyData).length === 0 && db.expenses && db.expenses.length > 0) {
+    const curMonth = new Date().toISOString().substring(0, 7);
+    db.monthlyData[curMonth] = db.expenses;
+  }
+
+  // If data exists for monthKey, return it
+  if (db.monthlyData[monthKey] && Array.isArray(db.monthlyData[monthKey])) {
+    return db.monthlyData[monthKey];
+  }
+
+  // If no data exists for monthKey, clone from closest existing month or db.expenses
+  const existingMonths = Object.keys(db.monthlyData).sort();
+  let baseList = db.expenses || [];
+  if (existingMonths.length > 0) {
+    const lastMonth = existingMonths[existingMonths.length - 1];
+    baseList = db.monthlyData[lastMonth];
+  }
+
+  // Deep clone items so editing monthKey does not mutate other months
+  const clonedList = JSON.parse(JSON.stringify(baseList));
+  db.monthlyData[monthKey] = clonedList;
+  writeDB(db);
+  return clonedList;
+}
+
 // GET Expenses
 app.get('/api/expenses', (req, res) => {
   const db = readDB();
-  res.json(db.expenses || []);
+  const monthKey = req.query.month || (new Date().toISOString().substring(0, 7));
+  const expensesList = getExpensesForMonth(db, monthKey);
+  res.json(expensesList);
 });
 
 // POST Expense
 app.post('/api/expenses', (req, res) => {
   const db = readDB();
+  const monthKey = req.query.month || req.body.month || (new Date().toISOString().substring(0, 7));
+  const expensesList = getExpensesForMonth(db, monthKey);
+
   const { entity, category, name, email, price, currency, dueDate, extraCreditCost, details, billingFrequency, extraBillingFrequency, isPerUser, userCount, costPerUser } = req.body;
 
   if (!entity || !category || !name || price === undefined || !currency) {
@@ -107,7 +144,8 @@ app.post('/api/expenses', (req, res) => {
     costPerUser: parseFloat(costPerUser || 0)
   };
 
-  db.expenses.push(newExpense);
+  expensesList.push(newExpense);
+  db.monthlyData[monthKey] = expensesList;
   
   if (writeDB(db)) {
     res.status(201).json(newExpense);
@@ -120,10 +158,12 @@ app.post('/api/expenses', (req, res) => {
 app.put('/api/expenses/:id', (req, res) => {
   const db = readDB();
   const id = req.params.id;
-  const index = db.expenses.findIndex(e => e.id === id);
+  const monthKey = req.query.month || req.body.month || (new Date().toISOString().substring(0, 7));
+  const expensesList = getExpensesForMonth(db, monthKey);
+  const index = expensesList.findIndex(e => e.id === id);
 
   if (index === -1) {
-    return res.status(404).json({ error: "Expense not found" });
+    return res.status(404).json({ error: "Expense not found for this month" });
   }
 
   const { entity, category, name, email, price, currency, dueDate, extraCreditCost, details, billingFrequency, extraBillingFrequency, isPerUser, userCount, costPerUser } = req.body;
@@ -137,7 +177,7 @@ app.put('/api/expenses/:id', (req, res) => {
     return res.status(400).json({ error: "Price must be a number" });
   }
 
-  db.expenses[index] = {
+  expensesList[index] = {
     id,
     entity,
     category,
@@ -155,8 +195,10 @@ app.put('/api/expenses/:id', (req, res) => {
     costPerUser: parseFloat(costPerUser || 0)
   };
 
+  db.monthlyData[monthKey] = expensesList;
+
   if (writeDB(db)) {
-    res.json(db.expenses[index]);
+    res.json(expensesList[index]);
   } else {
     res.status(500).json({ error: "Failed to write database" });
   }
@@ -166,13 +208,16 @@ app.put('/api/expenses/:id', (req, res) => {
 app.delete('/api/expenses/:id', (req, res) => {
   const db = readDB();
   const id = req.params.id;
-  const index = db.expenses.findIndex(e => e.id === id);
+  const monthKey = req.query.month || (new Date().toISOString().substring(0, 7));
+  const expensesList = getExpensesForMonth(db, monthKey);
+  const index = expensesList.findIndex(e => e.id === id);
 
   if (index === -1) {
-    return res.status(404).json({ error: "Expense not found" });
+    return res.status(404).json({ error: "Expense not found for this month" });
   }
 
-  db.expenses.splice(index, 1);
+  expensesList.splice(index, 1);
+  db.monthlyData[monthKey] = expensesList;
 
   if (writeDB(db)) {
     res.json({ message: "Expense deleted successfully" });
