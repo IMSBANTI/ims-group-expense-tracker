@@ -156,8 +156,8 @@
             <p>View, search, edit and register new monthly subscription items.</p>
           </div>
           <div style="display: flex; gap: 0.75rem; align-items: center;">
-            <button class="btn btn-secondary" onclick="openNewCategoryModal()" style="font-weight: 700;">
-              + Add Category
+            <button class="btn btn-secondary" onclick="openCategoryManagerModal()" style="font-weight: 700;">
+              ⚙️ Manage Categories
             </button>
             <button class="btn btn-primary" id="add-expense-btn" onclick="openExpenseModal()">
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -466,6 +466,32 @@ Please find below the consolidated monthly subscription expenses (AI accounts, S
         </div>
       </form>
     </div>
+  <!-- MODAL: MANAGE CATEGORIES -->
+  <div class="modal-backdrop" id="category-manager-modal">
+    <div class="modal glass-panel modal-sm">
+      <div class="modal-header">
+        <h3>Manage Categories</h3>
+        <button class="modal-close-btn" onclick="closeCategoryManagerModal()">×</button>
+      </div>
+      
+      <div style="max-height: 250px; overflow-y: auto; margin-bottom: 1rem; border: 1px solid var(--border-glass); border-radius: 8px; padding: 0.5rem;" id="category-manager-list">
+        <!-- Rendered via JS -->
+      </div>
+      
+      <div style="border-top: 1px solid var(--border-glass); padding-top: 0.85rem;">
+        <label style="font-size: 0.85rem; font-weight: 700; margin-bottom: 0.5rem; display: block;">Add New Category</label>
+        <div style="display: flex; gap: 0.5rem;">
+          <input type="text" id="new-cat-mgr-input" placeholder="e.g. Hosting, Domain..." style="flex: 1;">
+          <button type="button" class="btn btn-primary" onclick="saveNewCategoryFromManager()">Add</button>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="margin-top: 1rem;">
+        <button type="button" class="btn btn-secondary" onclick="closeCategoryManagerModal()">Close</button>
+      </div>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div class="toast-container" id="toast-container"></div>
 

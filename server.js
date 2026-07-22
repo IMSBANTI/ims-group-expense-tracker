@@ -108,6 +108,24 @@ app.post('/api/categories', (req, res) => {
   }
 });
 
+// DELETE Category
+app.delete('/api/categories/:name', (req, res) => {
+  const db = readDB();
+  const categoryName = decodeURIComponent(req.params.name).trim();
+
+  if (!db.customCategories) {
+    db.customCategories = [...DEFAULT_CATEGORIES];
+  }
+
+  db.customCategories = db.customCategories.filter(c => c.toLowerCase() !== categoryName.toLowerCase());
+
+  if (writeDB(db)) {
+    res.json({ categories: db.customCategories, message: `Category '${categoryName}' deleted` });
+  } else {
+    res.status(500).json({ error: "Failed to delete category" });
+  }
+});
+
 // GET Entities / Companies
 app.get('/api/entities', (req, res) => {
   const db = readDB();

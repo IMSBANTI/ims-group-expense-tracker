@@ -1424,11 +1424,65 @@ async function saveNewCompany(e) {
   }
 }
 
-async function openNewCategoryModal() {
-  const categoryInput = prompt("Enter new category name (e.g. Hosting, Domain, Hardware, Marketing):");
-  if (!categoryInput || !categoryInput.trim()) return;
+function openCategoryManagerModal() {
+  renderCategoryManagerList();
+  const inputEl = document.getElementById('new-cat-mgr-input');
+  if (inputEl) inputEl.value = '';
+  const modal = document.getElementById('category-manager-modal');
+  if (modal) modal.classList.add('active');
+}
 
-  const name = categoryInput.trim();
+function closeCategoryManagerModal() {
+  const modal = document.getElementById('category-manager-modal');
+  if (modal) modal.classList.remove('active');
+}
+
+function renderCategoryManagerList() {
+  const container = document.getElementById('category-manager-list');
+  if (!container) return;
+
+  if (!customCategoriesList || customCategoriesList.length === 0) {
+    container.innerHTML = `<div style="text-align: center; color: var(--text-muted); padding: 1rem;">No categories found.</div>`;
+    return;
+  }
+
+  container.innerHTML = customCategoriesList.map(cat => `
+    <div style="display: flex; align-items: center; justify-content: space-between; padding: 0.5rem; border-bottom: 1px solid var(--border-glass);">
+      <span style="font-weight: 600; font-size: 0.9rem;">${escapeHTML(cat)}</span>
+      <button type="button" class="btn-icon delete-btn" onclick="deleteCategory('${escapeHTML(cat)}')" title="Remove Category">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+      </button>
+    </div>
+  `).join('');
+}
+
+async function deleteCategory(categoryName) {
+  if (!confirm(`Are you sure you want to remove category "${categoryName}"?`)) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/categories/${encodeURIComponent(categoryName)}`, {
+      method: 'DELETE'
+    });
+
+    if (!res.ok) throw new Error("Failed to delete category");
+    const data = await res.json();
+    customCategoriesList = data.categories || [];
+
+    populateCategoryDropdowns();
+    renderCategoryManagerList();
+    showToast(`Category "${categoryName}" removed successfully`, 'success');
+  } catch (err) {
+    showToast("Error deleting category", "error");
+    console.error(err);
+  }
+}
+
+async function saveNewCategoryFromManager() {
+  const inputEl = document.getElementById('new-cat-mgr-input');
+  if (!inputEl) return;
+  const name = inputEl.value.trim();
+  if (!name) return;
+
   try {
     const res = await fetch(`${API_BASE}/api/categories`, {
       method: 'POST',
@@ -1441,6 +1495,8 @@ async function openNewCategoryModal() {
     customCategoriesList = data.categories || [];
 
     populateCategoryDropdowns();
+    renderCategoryManagerList();
+    inputEl.value = '';
     showToast(`New category "${name}" added successfully`, 'success');
   } catch (err) {
     showToast("Error adding category", "error");
