@@ -64,8 +64,42 @@ document.addEventListener('DOMContentLoaded', () => {
   // Set default billing month to current month
   const today = new Date();
   const monthStr = today.getFullYear() + '-' + String(today.getMonth() + 1).padStart(2, '0');
-  document.getElementById('report-month').value = monthStr;
+  
+  const dashMonthInput = document.getElementById('dashboard-month-picker');
+  if (dashMonthInput) dashMonthInput.value = monthStr;
+  
+  const reportMonthInput = document.getElementById('report-month');
+  if (reportMonthInput) reportMonthInput.value = monthStr;
+
+  updateActiveBillingMonth(monthStr, false);
 });
+
+function updateActiveBillingMonth(yearMonthStr, showToastNotice = true) {
+  if (!yearMonthStr) return;
+  
+  const [year, month] = yearMonthStr.split('-');
+  const dateObj = new Date(parseInt(year), parseInt(month) - 1, 1);
+  const formattedMonth = dateObj.toLocaleString('en-US', { month: 'long', year: 'numeric' });
+  
+  // Update dashboard banner text
+  const activeTextEl = document.getElementById('active-month-text');
+  if (activeTextEl) activeTextEl.textContent = formattedMonth;
+  
+  // Keep dashboard and report generator month pickers in sync
+  const dashMonthInput = document.getElementById('dashboard-month-picker');
+  if (dashMonthInput && dashMonthInput.value !== yearMonthStr) {
+    dashMonthInput.value = yearMonthStr;
+  }
+
+  const reportMonthInput = document.getElementById('report-month');
+  if (reportMonthInput && reportMonthInput.value !== yearMonthStr) {
+    reportMonthInput.value = yearMonthStr;
+  }
+  
+  if (showToastNotice) {
+    showToast(`Active expense period set to ${formattedMonth}`, 'info');
+  }
+}
 
 function applyReadOnlyUI() {
   if (isReadOnly) {
