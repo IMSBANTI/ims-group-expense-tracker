@@ -246,13 +246,18 @@
       "id": "18",
       "entity": "IMS",
       "category": "Mail",
-      "name": "IMS.COM Domain/Workspaces",
-      "email": "",
+      "name": "Google Workspace (ims.com.bd)",
+      "email": "admin@ims.com.bd",
       "price": 596,
       "currency": "USD",
       "dueDate": "Yearly",
       "extraCreditCost": 0,
-      "details": "ims.com.bd Google Workspace Mail"
+      "details": "ims.com.bd Google Workspace Mail",
+      "billingFrequency": "yearly",
+      "extraBillingFrequency": "yearly",
+      "isPerUser": true,
+      "userCount": 0,
+      "costPerUser": 0
     },
     {
       "id": "19",
