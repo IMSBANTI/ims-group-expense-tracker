@@ -796,52 +796,76 @@ function calculateSeatTotal() {
 }
 
 function openExpenseModal(editId = null) {
-  populateCategoryDropdowns();
-  populateEntityDropdowns();
+  try { populateCategoryDropdowns(); } catch (e) { console.error("Error populating category dropdowns:", e); }
+  try { populateEntityDropdowns(); } catch (e) { console.error("Error populating entity dropdowns:", e); }
 
   const modal = document.getElementById('expense-modal');
+  if (!modal) return;
+
   const form = document.getElementById('expense-form');
   const title = document.getElementById('modal-title');
   const saveBtn = document.getElementById('modal-save-btn');
 
-  form.reset();
-  document.getElementById('field-id').value = '';
-  document.getElementById('field-is-per-user').checked = false;
-  document.getElementById('field-user-count').value = '';
-  document.getElementById('field-cost-per-user').value = '';
-  document.getElementById('seat-calc-inputs').classList.add('hidden');
+  if (form) form.reset();
+  const idEl = document.getElementById('field-id');
+  if (idEl) idEl.value = '';
+  
+  const perUserEl = document.getElementById('field-is-per-user');
+  if (perUserEl) perUserEl.checked = false;
+  
+  const uCountEl = document.getElementById('field-user-count');
+  if (uCountEl) uCountEl.value = '';
+  
+  const uCostEl = document.getElementById('field-cost-per-user');
+  if (uCostEl) uCostEl.value = '';
+  
+  const seatInputs = document.getElementById('seat-calc-inputs');
+  if (seatInputs) seatInputs.classList.add('hidden');
 
-  if (editId) {
-    const exp = expenses.find(e => e.id === editId);
-    if (!exp) return;
-    
-    title.textContent = "Edit Subscription Item";
-    saveBtn.textContent = "Update Expense";
-    
-    document.getElementById('field-id').value = exp.id;
-    document.getElementById('field-entity').value = exp.entity;
-    document.getElementById('field-category').value = exp.category;
-    document.getElementById('field-name').value = exp.name;
-    document.getElementById('field-email').value = exp.email;
-    document.getElementById('field-price').value = exp.price;
-    document.getElementById('field-currency').value = exp.currency;
-    document.getElementById('field-extra-cost').value = exp.extraCreditCost || 0;
-    document.getElementById('field-due-date').value = exp.dueDate || '';
-    document.getElementById('field-details').value = exp.details || '';
-    document.getElementById('field-billing-frequency').value = exp.billingFrequency || 'monthly';
-    document.getElementById('field-extra-billing-frequency').value = exp.extraBillingFrequency || 'monthly';
+  if (editId !== null && editId !== undefined && editId !== '') {
+    const exp = expenses.find(e => String(e.id) === String(editId));
+    if (exp) {
+      if (title) title.textContent = "Edit Subscription Item";
+      if (saveBtn) saveBtn.textContent = "Update Expense";
+      
+      if (idEl) idEl.value = exp.id;
+      const entEl = document.getElementById('field-entity');
+      if (entEl) entEl.value = exp.entity;
+      const catEl = document.getElementById('field-category');
+      if (catEl) catEl.value = exp.category;
+      const nameEl = document.getElementById('field-name');
+      if (nameEl) nameEl.value = exp.name || '';
+      const emailEl = document.getElementById('field-email');
+      if (emailEl) emailEl.value = exp.email || '';
+      const priceEl = document.getElementById('field-price');
+      if (priceEl) priceEl.value = exp.price || 0;
+      const currEl = document.getElementById('field-currency');
+      if (currEl) currEl.value = exp.currency || 'USD';
+      const extraCostEl = document.getElementById('field-extra-cost');
+      if (extraCostEl) extraCostEl.value = exp.extraCreditCost || 0;
+      const dueEl = document.getElementById('field-due-date');
+      if (dueEl) dueEl.value = exp.dueDate || '';
+      const detEl = document.getElementById('field-details');
+      if (detEl) detEl.value = exp.details || '';
+      const billFreqEl = document.getElementById('field-billing-frequency');
+      if (billFreqEl) billFreqEl.value = exp.billingFrequency || 'monthly';
+      const extraBillFreqEl = document.getElementById('field-extra-billing-frequency');
+      if (extraBillFreqEl) extraBillFreqEl.value = exp.extraBillingFrequency || 'monthly';
 
-    if (exp.isPerUser) {
-      document.getElementById('field-is-per-user').checked = true;
-      document.getElementById('field-user-count').value = exp.userCount || '';
-      document.getElementById('field-cost-per-user').value = exp.costPerUser || '';
-      document.getElementById('seat-calc-inputs').classList.remove('hidden');
+      if (exp.isPerUser) {
+        if (perUserEl) perUserEl.checked = true;
+        if (uCountEl) uCountEl.value = exp.userCount || '';
+        if (uCostEl) uCostEl.value = exp.costPerUser || '';
+        if (seatInputs) seatInputs.classList.remove('hidden');
+      }
     }
   } else {
-    title.textContent = "Add Subscription / Expense Item";
-    saveBtn.textContent = "Register Expense";
-    document.getElementById('field-billing-frequency').value = 'monthly';
-    document.getElementById('field-extra-billing-frequency').value = 'monthly';
+    if (title) title.textContent = "Add Subscription / Expense Item";
+    if (saveBtn) saveBtn.textContent = "Register Expense";
+    const billFreqEl = document.getElementById('field-billing-frequency');
+    if (billFreqEl) billFreqEl.value = 'monthly';
+    const extraBillFreqEl = document.getElementById('field-extra-billing-frequency');
+    if (extraBillFreqEl) extraBillFreqEl.value = 'monthly';
   }
 
   modal.classList.add('active');
