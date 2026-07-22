@@ -1275,7 +1275,11 @@ function escapeHTML(str) {
 async function fetchCategories() {
   const savedCats = localStorage.getItem('customCategories');
   if (savedCats) {
-    try { customCategoriesList = JSON.parse(savedCats); } catch(e){}
+    try { 
+      customCategoriesList = JSON.parse(savedCats);
+      customCategoriesList = customCategoriesList.filter(c => c.toLowerCase() !== 'book');
+      localStorage.setItem('customCategories', JSON.stringify(customCategoriesList));
+    } catch(e){}
   }
   try {
     if (isReadOnly) {
@@ -1291,6 +1295,8 @@ async function fetchCategories() {
         if (Array.isArray(remoteCats)) customCategoriesList = remoteCats;
       }
     }
+    customCategoriesList = customCategoriesList.filter(c => c.toLowerCase() !== 'book');
+    localStorage.setItem('customCategories', JSON.stringify(customCategoriesList));
   } catch (err) {
     console.error("Error fetching categories:", err);
   } finally {
