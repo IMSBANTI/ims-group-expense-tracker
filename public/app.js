@@ -796,6 +796,9 @@ function calculateSeatTotal() {
 }
 
 function openExpenseModal(editId = null) {
+  populateCategoryDropdowns();
+  populateEntityDropdowns();
+
   const modal = document.getElementById('expense-modal');
   const form = document.getElementById('expense-form');
   const title = document.getElementById('modal-title');
