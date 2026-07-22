@@ -333,26 +333,28 @@ Please find below the consolidated monthly subscription expenses (AI accounts, S
           <div class="form-row">
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                <label for="field-entity" style="margin: 0;">Entity / Company *</label>
-                <button type="button" onclick="openNewCompanyModal()" style="font-size: 0.75rem; background: none; border: none; color: var(--color-primary); cursor: pointer; font-weight: 600;">+ New Company</button>
+                <label for="field-entity" style="margin: 0; font-weight: 700;">Entity / Company *</label>
+                <button type="button" onclick="openNewCompanyModal()" style="font-size: 0.72rem; background: rgba(37, 99, 235, 0.15); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.3); padding: 3px 8px; border-radius: 4px; font-weight: 700; cursor: pointer;">+ Add Company</button>
               </div>
-              <select id="field-entity" required>
+              <select id="field-entity" required onchange="handleEntitySelectChange(this.value)">
                 <option value="IMS">Integrated Marketing Service Ltd. (IMS)</option>
                 <option value="CLAN">Country's Largest Audience Network (CLAN)</option>
                 <option value="SCL">Sales Connect Ltd (SCL)</option>
                 <option value="TP">Trade Pulse (TP)</option>
+                <option value="__NEW__">+ Add New Company...</option>
               </select>
             </div>
             <div class="form-group">
               <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                <label for="field-category" style="margin: 0;">Category *</label>
-                <button type="button" onclick="openNewCategoryModal()" style="font-size: 0.75rem; background: none; border: none; color: var(--color-primary); cursor: pointer; font-weight: 600;">+ New Category</button>
+                <label for="field-category" style="margin: 0; font-weight: 700;">Category *</label>
+                <button type="button" onclick="openNewCategoryModal()" style="font-size: 0.72rem; background: rgba(37, 99, 235, 0.15); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.3); padding: 3px 8px; border-radius: 4px; font-weight: 700; cursor: pointer;">+ Add Category</button>
               </div>
-              <select id="field-category" required>
+              <select id="field-category" required onchange="handleCategorySelectChange(this.value)">
                 <option value="Monthly AI">Monthly AI</option>
                 <option value="Software">Software</option>
                 <option value="Internet">Internet</option>
                 <option value="Mail">Mail</option>
+                <option value="__NEW__">+ Add New Category...</option>
               </select>
             </div>
           </div>

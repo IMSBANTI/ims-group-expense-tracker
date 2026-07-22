@@ -1267,13 +1267,29 @@ async function fetchEntities() {
   }
 }
 
+function handleEntitySelectChange(val) {
+  if (val === '__NEW__') {
+    document.getElementById('field-entity').value = customEntitiesList[0]?.code || 'IMS';
+    openNewCompanyModal();
+  }
+}
+
+function handleCategorySelectChange(val) {
+  if (val === '__NEW__') {
+    document.getElementById('field-category').value = customCategoriesList[0] || 'Monthly AI';
+    openNewCategoryModal();
+  }
+}
+
 function populateCategoryDropdowns() {
   const formCatSelect = document.getElementById('field-category');
   const filterCatSelect = document.getElementById('category-filter');
 
   if (formCatSelect) {
     const currentVal = formCatSelect.value;
-    formCatSelect.innerHTML = customCategoriesList.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
+    let optsHTML = customCategoriesList.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
+    optsHTML += `<option value="__NEW__" style="font-weight: bold; color: #2563eb;">+ Add New Category...</option>`;
+    formCatSelect.innerHTML = optsHTML;
     if (currentVal && customCategoriesList.includes(currentVal)) formCatSelect.value = currentVal;
   }
 
@@ -1290,8 +1306,10 @@ function populateEntityDropdowns() {
 
   if (formEntSelect) {
     const currentVal = formEntSelect.value;
-    formEntSelect.innerHTML = customEntitiesList.map(e => `<option value="${escapeHTML(e.code)}">${escapeHTML(e.fullName)} (${escapeHTML(e.code)})</option>`).join('');
-    if (currentVal) formEntSelect.value = currentVal;
+    let optsHTML = customEntitiesList.map(e => `<option value="${escapeHTML(e.code)}">${escapeHTML(e.fullName)} (${escapeHTML(e.code)})</option>`).join('');
+    optsHTML += `<option value="__NEW__" style="font-weight: bold; color: #2563eb;">+ Add New Company...</option>`;
+    formEntSelect.innerHTML = optsHTML;
+    if (currentVal && currentVal !== '__NEW__') formEntSelect.value = currentVal;
   }
 
   if (tabsContainer) {
