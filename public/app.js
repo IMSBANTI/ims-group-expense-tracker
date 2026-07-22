@@ -1306,9 +1306,7 @@ function populateCategoryDropdowns() {
 
   if (formCatSelect) {
     const currentVal = formCatSelect.value;
-    let optsHTML = customCategoriesList.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
-    optsHTML += `<option value="__NEW__" style="font-weight: bold; color: #2563eb;">+ Add New Category...</option>`;
-    formCatSelect.innerHTML = optsHTML;
+    formCatSelect.innerHTML = customCategoriesList.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
     if (currentVal && customCategoriesList.includes(currentVal)) formCatSelect.value = currentVal;
   }
 
@@ -1325,10 +1323,8 @@ function populateEntityDropdowns() {
 
   if (formEntSelect) {
     const currentVal = formEntSelect.value;
-    let optsHTML = customEntitiesList.map(e => `<option value="${escapeHTML(e.code)}">${escapeHTML(e.fullName)} (${escapeHTML(e.code)})</option>`).join('');
-    optsHTML += `<option value="__NEW__" style="font-weight: bold; color: #2563eb;">+ Add New Company...</option>`;
-    formEntSelect.innerHTML = optsHTML;
-    if (currentVal && currentVal !== '__NEW__') formEntSelect.value = currentVal;
+    formEntSelect.innerHTML = customEntitiesList.map(e => `<option value="${escapeHTML(e.code)}">${escapeHTML(e.fullName)} (${escapeHTML(e.code)})</option>`).join('');
+    if (currentVal) formEntSelect.value = currentVal;
   }
 
   if (tabsContainer) {

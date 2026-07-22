@@ -332,30 +332,32 @@ Please find below the consolidated monthly subscription expenses (AI accounts, S
         <div class="modal-body">
           <div class="form-row">
             <div class="form-group">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                <label for="field-entity" style="margin: 0; font-weight: 700;">Entity / Company *</label>
-                <button type="button" onclick="openNewCompanyModal()" style="font-size: 0.72rem; background: rgba(37, 99, 235, 0.15); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.3); padding: 3px 8px; border-radius: 4px; font-weight: 700; cursor: pointer;">+ Add Company</button>
+              <label for="field-entity">Entity / Company *</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <select id="field-entity" required style="flex: 1;">
+                  <option value="IMS">Integrated Marketing Service Ltd. (IMS)</option>
+                  <option value="CLAN">Country's Largest Audience Network (CLAN)</option>
+                  <option value="SCL">Sales Connect Ltd (SCL)</option>
+                  <option value="TP">Trade Pulse (TP)</option>
+                </select>
+                <button type="button" onclick="openNewCompanyModal()" title="Add New Company" style="background: #2563eb; color: #ffffff; border: none; padding: 0 0.85rem; border-radius: 6px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; white-space: nowrap;">
+                  + Add
+                </button>
               </div>
-              <select id="field-entity" required onchange="handleEntitySelectChange(this.value)">
-                <option value="IMS">Integrated Marketing Service Ltd. (IMS)</option>
-                <option value="CLAN">Country's Largest Audience Network (CLAN)</option>
-                <option value="SCL">Sales Connect Ltd (SCL)</option>
-                <option value="TP">Trade Pulse (TP)</option>
-                <option value="__NEW__">+ Add New Company...</option>
-              </select>
             </div>
             <div class="form-group">
-              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
-                <label for="field-category" style="margin: 0; font-weight: 700;">Category *</label>
-                <button type="button" onclick="openNewCategoryModal()" style="font-size: 0.72rem; background: rgba(37, 99, 235, 0.15); color: #2563eb; border: 1px solid rgba(37, 99, 235, 0.3); padding: 3px 8px; border-radius: 4px; font-weight: 700; cursor: pointer;">+ Add Category</button>
+              <label for="field-category">Category *</label>
+              <div style="display: flex; gap: 0.5rem;">
+                <select id="field-category" required style="flex: 1;">
+                  <option value="Monthly AI">Monthly AI</option>
+                  <option value="Software">Software</option>
+                  <option value="Internet">Internet</option>
+                  <option value="Mail">Mail</option>
+                </select>
+                <button type="button" onclick="openNewCategoryModal()" title="Add New Category" style="background: #2563eb; color: #ffffff; border: none; padding: 0 0.85rem; border-radius: 6px; font-weight: 700; font-size: 0.82rem; cursor: pointer; display: flex; align-items: center; gap: 0.25rem; white-space: nowrap;">
+                  + Add
+                </button>
               </div>
-              <select id="field-category" required onchange="handleCategorySelectChange(this.value)">
-                <option value="Monthly AI">Monthly AI</option>
-                <option value="Software">Software</option>
-                <option value="Internet">Internet</option>
-                <option value="Mail">Mail</option>
-                <option value="__NEW__">+ Add New Category...</option>
-              </select>
             </div>
           </div>
 
