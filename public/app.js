@@ -1434,7 +1434,9 @@ function closeNewCategoryModal() {
 
 async function saveNewCategory(e) {
   e.preventDefault();
-  const name = document.getElementById('new-category-name').value.trim();
+  const inputEl = document.getElementById('new-category-name');
+  if (!inputEl) return;
+  const name = inputEl.value.trim();
   if (!name) return;
 
   try {
@@ -1446,12 +1448,11 @@ async function saveNewCategory(e) {
 
     if (!res.ok) throw new Error("Failed to save category");
     const data = await res.json();
-    customCategoriesList = data.categories;
+    customCategoriesList = data.categories || [];
 
     populateCategoryDropdowns();
-    document.getElementById('field-category').value = name;
     closeNewCategoryModal();
-    showToast(`New category "${name}" added`, 'success');
+    showToast(`New category "${name}" added successfully`, 'success');
   } catch (err) {
     showToast("Error adding category", "error");
     console.error(err);

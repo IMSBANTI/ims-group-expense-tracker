@@ -155,10 +155,15 @@
             <h1>Expense Manager</h1>
             <p>View, search, edit and register new monthly subscription items.</p>
           </div>
-          <button class="btn btn-primary" id="add-expense-btn" onclick="openExpenseModal()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Add New Item
-          </button>
+          <div style="display: flex; gap: 0.75rem; align-items: center;">
+            <button class="btn btn-secondary" onclick="openNewCategoryModal()" style="font-weight: 700;">
+              + Add Category
+            </button>
+            <button class="btn btn-primary" id="add-expense-btn" onclick="openExpenseModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              Add New Item
+            </button>
+          </div>
         </div>
 
         <!-- Filters Toolbar -->
@@ -461,6 +466,26 @@ Please find below the consolidated monthly subscription expenses (AI accounts, S
         </div>
       </form>
     </div>
+  <!-- MODAL: ADD NEW CATEGORY -->
+  <div class="modal-backdrop" id="new-category-modal">
+    <div class="modal glass-panel modal-sm">
+      <div class="modal-header">
+        <h3>Add New Category</h3>
+        <button class="modal-close-btn" onclick="closeNewCategoryModal()">×</button>
+      </div>
+      <form id="new-category-form" onsubmit="saveNewCategory(event)">
+        <div class="form-group">
+          <label for="new-category-name">Category Name *</label>
+          <input type="text" id="new-category-name" placeholder="e.g., Hosting, Domain, Hardware, Marketing" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeNewCategoryModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Save Category</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- TOAST NOTIFICATION CONTAINER -->
   <div class="toast-container" id="toast-container"></div>
 
