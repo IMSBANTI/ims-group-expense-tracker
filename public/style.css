@@ -1055,6 +1055,12 @@ tr:hover td {
   pointer-events: all;
 }
 
+#new-company-modal,
+#new-category-modal,
+#settings-modal {
+  z-index: 1100 !important;
+}
+
 .modal {
   width: 90%;
   max-width: 600px;

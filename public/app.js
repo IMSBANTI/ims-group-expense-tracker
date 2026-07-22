@@ -879,21 +879,33 @@ async function saveExpense(e) {
   e.preventDefault();
   const id = document.getElementById('field-id').value;
   
+  const rawPrice = parseFloat(document.getElementById('field-price').value);
+  const price = isNaN(rawPrice) ? 0 : rawPrice;
+
+  const rawExtraCost = parseFloat(document.getElementById('field-extra-cost').value);
+  const extraCreditCost = isNaN(rawExtraCost) ? 0 : rawExtraCost;
+
+  const rawUserCount = parseInt(document.getElementById('field-user-count').value);
+  const userCount = isNaN(rawUserCount) ? 0 : rawUserCount;
+
+  const rawCostPerUser = parseFloat(document.getElementById('field-cost-per-user').value);
+  const costPerUser = isNaN(rawCostPerUser) ? 0 : rawCostPerUser;
+
   const payload = {
     entity: document.getElementById('field-entity').value,
     category: document.getElementById('field-category').value,
     name: document.getElementById('field-name').value,
     email: document.getElementById('field-email').value,
-    price: parseFloat(document.getElementById('field-price').value),
+    price: price,
     currency: document.getElementById('field-currency').value,
-    extraCreditCost: parseFloat(document.getElementById('field-extra-cost').value || 0),
+    extraCreditCost: extraCreditCost,
     dueDate: document.getElementById('field-due-date').value,
     details: document.getElementById('field-details').value,
     billingFrequency: document.getElementById('field-billing-frequency').value,
     extraBillingFrequency: document.getElementById('field-extra-billing-frequency').value,
     isPerUser: document.getElementById('field-is-per-user').checked,
-    userCount: parseInt(document.getElementById('field-user-count').value || 0),
-    costPerUser: parseFloat(document.getElementById('field-cost-per-user').value || 0)
+    userCount: userCount,
+    costPerUser: costPerUser
   };
 
   const isEdit = !!id;
@@ -907,13 +919,16 @@ async function saveExpense(e) {
       body: JSON.stringify(payload)
     });
 
-    if (!res.ok) throw new Error("Failed to save expense item");
+    if (!res.ok) {
+      const errData = await res.json().catch(() => ({}));
+      throw new Error(errData.error || "Failed to save expense item");
+    }
     
     closeExpenseModal();
     showToast(isEdit ? "Expense updated successfully" : "New expense added successfully", "success");
     fetchExpenses(); // Refresh
   } catch (err) {
-    showToast("Error saving expense item", "error");
+    showToast(err.message || "Error saving expense item", "error");
     console.error(err);
   }
 }
