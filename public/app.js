@@ -796,9 +796,6 @@ function calculateSeatTotal() {
 }
 
 function openExpenseModal(editId = null) {
-  try { populateCategoryDropdowns(); } catch (e) { console.error("Error populating category dropdowns:", e); }
-  try { populateEntityDropdowns(); } catch (e) { console.error("Error populating entity dropdowns:", e); }
-
   const modal = document.getElementById('expense-modal');
   if (!modal) return;
 
