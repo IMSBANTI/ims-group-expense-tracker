@@ -3,7 +3,7 @@
     "usd_to_bdt": 124,
     "eur_to_bdt": 141
   },
-  "customCategories": ["Monthly AI", "Software", "Internet", "Mail"],
+  "customCategories": ["Monthly AI", "Software", "Internet", "Mail", "Hosting", "Domain", "Hardware", "Marketing"],
   "customEntities": [
     { "code": "IMS", "fullName": "Integrated Marketing Service Ltd.", "color": "#ef4444", "logo": "/assets/ims_logo.png" },
     { "code": "CLAN", "fullName": "Country's Largest Audience Network", "color": "#f97316", "logo": "/assets/clan_logo.png" },

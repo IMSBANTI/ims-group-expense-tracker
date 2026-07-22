@@ -70,7 +70,7 @@ app.post('/api/settings', (req, res) => {
 });
 
 // Default categories & entities lists
-const DEFAULT_CATEGORIES = ["Monthly AI", "Software", "Internet", "Mail"];
+const DEFAULT_CATEGORIES = ["Monthly AI", "Software", "Internet", "Mail", "Hosting", "Domain", "Hardware", "Marketing"];
 const DEFAULT_ENTITIES = [
   { code: "IMS", fullName: "Integrated Marketing Service Ltd.", color: "#ef4444", logo: "/assets/ims_logo.png" },
   { code: "CLAN", fullName: "Country's Largest Audience Network", color: "#f97316", logo: "/assets/clan_logo.png" },
