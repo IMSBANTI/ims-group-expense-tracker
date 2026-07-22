@@ -33,7 +33,7 @@ const ENTITY_CONFIG = {
 };
 
 let expenses = [];
-let settings = { usd_to_bdt: 120, eur_to_bdt: 130 };
+let settings = { usd_to_bdt: 124, eur_to_bdt: 141 };
 let activeEntityFilter = 'all';
 let viewMode = 'monthly'; // 'monthly' or 'daily'
 let activeMonth = new Date().toISOString().substring(0, 7); // e.g. "2026-07"
@@ -201,12 +201,15 @@ async function fetchSettings() {
   if (isReadOnly) return; // Loaded via fetchExpenses
   try {
     const res = await fetch(`${API_BASE}/api/settings`);
-    if (!res.ok) throw new Error("Failed to load settings");
-    settings = await res.json();
-    updateSettingsDisplay();
+    if (res.ok) {
+      settings = await res.json();
+      updateSettingsDisplay();
+      calculateMetrics();
+      populateTable();
+      renderCharts();
+    }
   } catch (err) {
-    showToast("Error fetching exchange rates", "error");
-    console.error(err);
+    console.error("Error fetching exchange rates:", err);
   }
 }
 

@@ -30,7 +30,7 @@ function readDB() {
     return JSON.parse(data);
   } catch (err) {
     console.error("Error reading database:", err);
-    return { settings: { usd_to_bdt: 120, eur_to_bdt: 130 }, expenses: [] };
+    return { settings: { usd_to_bdt: 124, eur_to_bdt: 141 }, expenses: [] };
   }
 }
 
@@ -48,7 +48,7 @@ function writeDB(data) {
 // GET Settings
 app.get('/api/settings', (req, res) => {
   const db = readDB();
-  res.json(db.settings || { usd_to_bdt: 120, eur_to_bdt: 130 });
+  res.json(db.settings || { usd_to_bdt: 124, eur_to_bdt: 141 });
 });
 
 // PUT Settings
