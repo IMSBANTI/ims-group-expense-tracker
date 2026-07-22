@@ -1098,19 +1098,26 @@ tr:hover td {
 }
 
 .toast {
-  background: rgba(17, 26, 51, 0.9);
+  background: #1e293b;
   backdrop-filter: blur(8px);
-  border: 1px solid var(--border-glass);
+  border: 1px solid rgba(255, 255, 255, 0.15);
   border-radius: 8px;
   padding: 0.75rem 1.25rem;
-  color: var(--text-primary);
+  color: #ffffff;
   font-weight: 600;
   font-size: 0.85rem;
   display: flex;
   align-items: center;
   gap: 0.75rem;
-  box-shadow: var(--shadow-card);
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.4);
   animation: toast-slide-in 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+:root[data-theme="light"] .toast {
+  background: #ffffff;
+  color: #0f172a;
+  border: 1px solid #cbd5e1;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15);
 }
 
 @keyframes toast-slide-in {
