@@ -67,6 +67,85 @@ app.post('/api/settings', (req, res) => {
   } else {
     res.status(500).json({ error: "Failed to write database" });
   }
+// Default categories & entities lists
+const DEFAULT_CATEGORIES = ["Monthly AI", "Software", "Internet", "Mail"];
+const DEFAULT_ENTITIES = [
+  { code: "IMS", fullName: "Integrated Marketing Service Ltd.", color: "#ef4444", logo: "/assets/ims_logo.png" },
+  { code: "CLAN", fullName: "Country's Largest Audience Network", color: "#f97316", logo: "/assets/clan_logo.png" },
+  { code: "SCL", fullName: "Sales Connect Ltd", color: "#881337", logo: "/assets/scl_logo.png" },
+  { code: "TP", fullName: "Trade Pulse", color: "#059669", logo: "/assets/tp_logo.png" }
+];
+
+// GET Categories
+app.get('/api/categories', (req, res) => {
+  const db = readDB();
+  res.json(db.customCategories || DEFAULT_CATEGORIES);
+});
+
+// POST New Category
+app.post('/api/categories', (req, res) => {
+  const db = readDB();
+  const { name } = req.body;
+  if (!name || typeof name !== 'string') {
+    return res.status(400).json({ error: "Category name is required" });
+  }
+
+  if (!db.customCategories) {
+    db.customCategories = [...DEFAULT_CATEGORIES];
+  }
+
+  const categoryName = name.trim();
+  if (!db.customCategories.includes(categoryName)) {
+    db.customCategories.push(categoryName);
+  }
+
+  if (writeDB(db)) {
+    res.json({ categories: db.customCategories, added: categoryName });
+  } else {
+    res.status(500).json({ error: "Failed to save category" });
+  }
+});
+
+// GET Entities / Companies
+app.get('/api/entities', (req, res) => {
+  const db = readDB();
+  res.json(db.customEntities || DEFAULT_ENTITIES);
+});
+
+// POST New Entity / Company
+app.post('/api/entities', (req, res) => {
+  const db = readDB();
+  const { code, fullName, color, logo } = req.body;
+
+  if (!code || !fullName) {
+    return res.status(400).json({ error: "Company code and full name are required" });
+  }
+
+  if (!db.customEntities) {
+    db.customEntities = [...DEFAULT_ENTITIES];
+  }
+
+  const entityCode = code.trim().toUpperCase();
+  const existingIndex = db.customEntities.findIndex(e => e.code === entityCode);
+  
+  const newEntity = {
+    code: entityCode,
+    fullName: fullName.trim(),
+    color: color || '#3b82f6',
+    logo: logo || ''
+  };
+
+  if (existingIndex >= 0) {
+    db.customEntities[existingIndex] = newEntity;
+  } else {
+    db.customEntities.push(newEntity);
+  }
+
+  if (writeDB(db)) {
+    res.json({ entities: db.customEntities, added: newEntity });
+  } else {
+    res.status(500).json({ error: "Failed to save company" });
+  }
 });
 
 // Helper to get or clone expenses for a specific month

@@ -52,12 +52,22 @@ let categoryChart = null;
 // ==========================================================================
 // INITIALIZATION
 // ==========================================================================
+let customCategoriesList = ["Monthly AI", "Software", "Internet", "Mail"];
+let customEntitiesList = [
+  { code: "IMS", fullName: "Integrated Marketing Service Ltd.", color: "#ef4444", logo: "/assets/ims_logo.png" },
+  { code: "CLAN", fullName: "Country's Largest Audience Network", color: "#f97316", logo: "/assets/clan_logo.png" },
+  { code: "SCL", fullName: "Sales Connect Ltd", color: "#881337", logo: "/assets/scl_logo.png" },
+  { code: "TP", fullName: "Trade Pulse", color: "#059669", logo: "/assets/tp_logo.png" }
+];
+
 document.addEventListener('DOMContentLoaded', () => {
   const savedTheme = localStorage.getItem('theme') || 'dark';
   applyTheme(savedTheme);
 
   initNavigation();
   fetchSettings();
+  fetchCategories();
+  fetchEntities();
   fetchExpenses().then(() => {
     applyReadOnlyUI();
   });
@@ -1218,4 +1228,163 @@ function escapeHTML(str) {
       '"': '&quot;'
     }[tag] || tag)
   );
+}
+
+// ==========================================================================
+// DYNAMIC CATEGORIES & ENTITIES MANAGEMENT
+// ==========================================================================
+async function fetchCategories() {
+  if (isReadOnly) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/categories`);
+    if (res.ok) {
+      customCategoriesList = await res.json();
+      populateCategoryDropdowns();
+    }
+  } catch (err) {
+    console.error("Error fetching categories:", err);
+  }
+}
+
+async function fetchEntities() {
+  if (isReadOnly) return;
+  try {
+    const res = await fetch(`${API_BASE}/api/entities`);
+    if (res.ok) {
+      customEntitiesList = await res.json();
+      customEntitiesList.forEach(e => {
+        ENTITY_CONFIG[e.code] = {
+          fullName: e.fullName,
+          logo: e.logo || '',
+          color: e.color || '#3b82f6',
+          class: `badge-entity-${e.code.toLowerCase()}`
+        };
+      });
+      populateEntityDropdowns();
+    }
+  } catch (err) {
+    console.error("Error fetching entities:", err);
+  }
+}
+
+function populateCategoryDropdowns() {
+  const formCatSelect = document.getElementById('field-category');
+  const filterCatSelect = document.getElementById('category-filter');
+
+  if (formCatSelect) {
+    const currentVal = formCatSelect.value;
+    formCatSelect.innerHTML = customCategoriesList.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
+    if (currentVal && customCategoriesList.includes(currentVal)) formCatSelect.value = currentVal;
+  }
+
+  if (filterCatSelect) {
+    const currentFilterVal = filterCatSelect.value;
+    filterCatSelect.innerHTML = `<option value="all">All Categories</option>` + customCategoriesList.map(c => `<option value="${escapeHTML(c)}">${escapeHTML(c)}</option>`).join('');
+    if (currentFilterVal) filterCatSelect.value = currentFilterVal;
+  }
+}
+
+function populateEntityDropdowns() {
+  const formEntSelect = document.getElementById('field-entity');
+  const tabsContainer = document.getElementById('entity-filter-tabs');
+
+  if (formEntSelect) {
+    const currentVal = formEntSelect.value;
+    formEntSelect.innerHTML = customEntitiesList.map(e => `<option value="${escapeHTML(e.code)}">${escapeHTML(e.fullName)} (${escapeHTML(e.code)})</option>`).join('');
+    if (currentVal) formEntSelect.value = currentVal;
+  }
+
+  if (tabsContainer) {
+    let tabsHTML = `<button class="filter-tab ${activeEntityFilter === 'all' ? 'active' : ''}" data-filter="all">All</button>`;
+    customEntitiesList.forEach(e => {
+      const isActive = activeEntityFilter === e.code ? 'active' : '';
+      let logoHTML = '';
+      if (e.logo) {
+        logoHTML = `<img src="${e.logo}" style="height: 12px; max-width: 36px; object-fit: contain; background: white; padding: 1px 3px; border-radius: 2px;" alt="${e.code}">`;
+      }
+      tabsHTML += `
+        <button class="filter-tab ${isActive}" data-filter="${e.code}">
+          <div style="display: flex; align-items: center; gap: 6px;">
+            ${logoHTML}
+            <span>${e.code}</span>
+          </div>
+        </button>
+      `;
+    });
+    tabsContainer.innerHTML = tabsHTML;
+    initEntityFilterTabs();
+  }
+}
+
+function openNewCompanyModal() {
+  document.getElementById('new-company-form').reset();
+  document.getElementById('new-company-modal').classList.add('active');
+}
+function closeNewCompanyModal() {
+  document.getElementById('new-company-modal').classList.remove('active');
+}
+
+async function saveNewCompany(e) {
+  e.preventDefault();
+  const code = document.getElementById('new-company-code').value.trim().toUpperCase();
+  const fullName = document.getElementById('new-company-name').value.trim();
+  const color = document.getElementById('new-company-color').value;
+
+  if (!code || !fullName) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/entities`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code, fullName, color })
+    });
+
+    if (!res.ok) throw new Error("Failed to save company");
+    const data = await res.json();
+    customEntitiesList = data.entities;
+    
+    ENTITY_CONFIG[code] = { fullName, color, class: `badge-entity-${code.toLowerCase()}` };
+
+    populateEntityDropdowns();
+    document.getElementById('field-entity').value = code;
+    closeNewCompanyModal();
+    showToast(`New company "${fullName}" added`, 'success');
+  } catch (err) {
+    showToast("Error adding company", "error");
+    console.error(err);
+  }
+}
+
+function openNewCategoryModal() {
+  document.getElementById('new-category-form').reset();
+  document.getElementById('new-category-modal').classList.add('active');
+}
+function closeNewCategoryModal() {
+  document.getElementById('new-category-modal').classList.remove('active');
+}
+
+async function saveNewCategory(e) {
+  e.preventDefault();
+  const name = document.getElementById('new-category-name').value.trim();
+  if (!name) return;
+
+  try {
+    const res = await fetch(`${API_BASE}/api/categories`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name })
+    });
+
+    if (!res.ok) throw new Error("Failed to save category");
+    const data = await res.json();
+    customCategoriesList = data.categories;
+
+    populateCategoryDropdowns();
+    document.getElementById('field-category').value = name;
+    closeNewCategoryModal();
+    showToast(`New category "${name}" added`, 'success');
+  } catch (err) {
+    showToast("Error adding category", "error");
+    console.error(err);
+  }
 }

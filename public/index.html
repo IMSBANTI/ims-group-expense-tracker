@@ -332,7 +332,10 @@ Please find below the consolidated monthly subscription expenses (AI accounts, S
         <div class="modal-body">
           <div class="form-row">
             <div class="form-group">
-              <label for="field-entity">Entity / Company *</label>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                <label for="field-entity" style="margin: 0;">Entity / Company *</label>
+                <button type="button" onclick="openNewCompanyModal()" style="font-size: 0.75rem; background: none; border: none; color: var(--color-primary); cursor: pointer; font-weight: 600;">+ New Company</button>
+              </div>
               <select id="field-entity" required>
                 <option value="IMS">Integrated Marketing Service Ltd. (IMS)</option>
                 <option value="CLAN">Country's Largest Audience Network (CLAN)</option>
@@ -341,7 +344,10 @@ Please find below the consolidated monthly subscription expenses (AI accounts, S
               </select>
             </div>
             <div class="form-group">
-              <label for="field-category">Category *</label>
+              <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.35rem;">
+                <label for="field-category" style="margin: 0;">Category *</label>
+                <button type="button" onclick="openNewCategoryModal()" style="font-size: 0.75rem; background: none; border: none; color: var(--color-primary); cursor: pointer; font-weight: 600;">+ New Category</button>
+              </div>
               <select id="field-category" required>
                 <option value="Monthly AI">Monthly AI</option>
                 <option value="Software">Software</option>
@@ -458,6 +464,52 @@ Please find below the consolidated monthly subscription expenses (AI accounts, S
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" onclick="closeSettingsModal()">Cancel</button>
           <button type="submit" class="btn btn-primary">Update Rates</button>
+        </div>
+      </form>
+    </div>
+  <!-- MODAL: ADD NEW COMPANY -->
+  <div class="modal-backdrop" id="new-company-modal">
+    <div class="modal glass-panel modal-sm">
+      <div class="modal-header">
+        <h3>Add New Company / Entity</h3>
+        <button class="modal-close-btn" onclick="closeNewCompanyModal()">×</button>
+      </div>
+      <form id="new-company-form" onsubmit="saveNewCompany(event)">
+        <div class="form-group">
+          <label for="new-company-code">Company Code / Acronym *</label>
+          <input type="text" id="new-company-code" placeholder="e.g., ABC, NEXUS" required style="text-transform: uppercase;">
+        </div>
+        <div class="form-group">
+          <label for="new-company-name">Full Company Name *</label>
+          <input type="text" id="new-company-name" placeholder="e.g., ABC Technologies Ltd." required>
+        </div>
+        <div class="form-group">
+          <label for="new-company-color">Brand Color</label>
+          <input type="color" id="new-company-color" value="#3b82f6" style="height: 40px; cursor: pointer; padding: 2px;">
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeNewCompanyModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Company</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: ADD NEW CATEGORY -->
+  <div class="modal-backdrop" id="new-category-modal">
+    <div class="modal glass-panel modal-sm">
+      <div class="modal-header">
+        <h3>Add New Category</h3>
+        <button class="modal-close-btn" onclick="closeNewCategoryModal()">×</button>
+      </div>
+      <form id="new-category-form" onsubmit="saveNewCategory(event)">
+        <div class="form-group">
+          <label for="new-category-name">Category Name *</label>
+          <input type="text" id="new-category-name" placeholder="e.g., Hosting, Domain, Hardware" required>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="closeNewCategoryModal()">Cancel</button>
+          <button type="submit" class="btn btn-primary">Add Category</button>
         </div>
       </form>
     </div>
