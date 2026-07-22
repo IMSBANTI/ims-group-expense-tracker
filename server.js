@@ -67,6 +67,8 @@ app.post('/api/settings', (req, res) => {
   } else {
     res.status(500).json({ error: "Failed to write database" });
   }
+});
+
 // Default categories & entities lists
 const DEFAULT_CATEGORIES = ["Monthly AI", "Software", "Internet", "Mail"];
 const DEFAULT_ENTITIES = [
