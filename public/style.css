@@ -43,7 +43,7 @@
   
   --text-primary: #000000; /* Pure Black */
   --text-secondary: #334155; /* Slate 700 */
-  --text-muted: #64748b; /* Slate 500 */
+  --text-muted: #334155; /* Dark Slate for high contrast */
   
   --color-primary: #000000; /* Black primary color */
   --color-primary-rgb: 0, 0, 0;
@@ -109,6 +109,28 @@
 :root[data-theme="light"] .email-envelope {
   background: #f8fafc;
   border-color: rgba(0, 0, 0, 0.08);
+}
+
+.active-period-banner,
+#readonly-notice {
+  background: rgba(17, 26, 51, 0.6) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #f8fafc !important;
+}
+
+:root[data-theme="light"] .active-period-banner,
+:root[data-theme="light"] #readonly-notice {
+  background: #ffffff !important;
+  border: 1px solid #cbd5e1 !important;
+  color: #0f172a !important;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05) !important;
+}
+
+:root[data-theme="light"] .active-period-banner span,
+:root[data-theme="light"] .active-period-banner strong,
+:root[data-theme="light"] .active-period-banner label,
+:root[data-theme="light"] #readonly-notice strong {
+  color: #0f172a !important;
 }
 
 :root[data-theme="light"] .modal-backdrop {
