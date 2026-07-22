@@ -1046,6 +1046,8 @@ tr:hover td {
   opacity: 0;
   pointer-events: none;
   transition: opacity 0.3s ease;
+  overflow-y: auto;
+  padding: 1.5rem 0;
 }
 
 .modal-backdrop.active {
@@ -1056,9 +1058,13 @@ tr:hover td {
 .modal {
   width: 90%;
   max-width: 600px;
-  padding: 2rem;
+  max-height: 85vh;
+  overflow-y: auto;
+  padding: 1.5rem;
   transform: translateY(30px);
   transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-backdrop.active .modal {
