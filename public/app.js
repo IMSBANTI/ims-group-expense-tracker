@@ -183,6 +183,10 @@ function initNavigation() {
   });
 
   // Entity filter tabs
+  initEntityFilterTabs();
+}
+
+function initEntityFilterTabs() {
   const filterTabs = document.querySelectorAll('.filter-tab');
   filterTabs.forEach(tab => {
     tab.addEventListener('click', () => {
