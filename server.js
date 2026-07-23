@@ -179,12 +179,15 @@ function getExpensesForMonth(db, monthKey) {
     return db.monthlyData[monthKey];
   }
 
-  // If no data exists for monthKey or array is empty, clone from closest non-empty month or db.expenses
-  const nonExistingMonths = Object.keys(db.monthlyData).filter(m => Array.isArray(db.monthlyData[m]) && db.monthlyData[m].length > 0).sort();
+  // Find all existing months that have data and are chronologically BEFORE the requested monthKey
+  const priorMonths = Object.keys(db.monthlyData)
+    .filter(m => Array.isArray(db.monthlyData[m]) && db.monthlyData[m].length > 0 && m < monthKey)
+    .sort();
+
   let baseList = db.expenses || [];
-  if (nonExistingMonths.length > 0) {
-    const lastMonth = nonExistingMonths[nonExistingMonths.length - 1];
-    baseList = db.monthlyData[lastMonth];
+  if (priorMonths.length > 0) {
+    const closestPriorMonth = priorMonths[priorMonths.length - 1];
+    baseList = db.monthlyData[closestPriorMonth];
   }
 
   // Deep clone items so editing monthKey does not mutate other months
