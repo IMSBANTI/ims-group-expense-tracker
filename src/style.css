@@ -655,14 +655,25 @@ body {
   position: absolute;
   top: 100%;
   right: 0;
-  margin-top: 6px;
+  margin-top: 0px; /* Removed physical gap */
   min-width: 180px;
   z-index: 1000;
   border-radius: 8px;
   padding: 6px 0;
   box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-  overflow: hidden;
+  overflow: visible; /* Changed from hidden to allow pseudo-element hover bridge */
   text-align: left;
+}
+
+/* Hover bridge to prevent mouseleave when moving from button to dropdown */
+.cloud-dropdown-content::before {
+  content: '';
+  position: absolute;
+  top: -12px;
+  left: 0;
+  right: 0;
+  height: 12px;
+  background: transparent;
 }
 
 .cloud-dropdown:hover .cloud-dropdown-content {
