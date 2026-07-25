@@ -7,14 +7,30 @@ async function syncFromCloud() {
     if (res.ok) {
       const cloudData = await res.json();
       
-      expenses = cloudData.expenses || [];
       settings = cloudData.settings || { usd_to_bdt: 124, eur_to_bdt: 141 };
-      
-      localStorage.setItem('ims_expenses_v2_' + activeMonth, JSON.stringify(expenses));
       localStorage.setItem('ims_settings', JSON.stringify(settings));
-      localStorage.setItem('ims_db_version', cloudData.dbVersion || '1.0.5');
+      localStorage.setItem('ims_db_version', cloudData.dbVersion || ('v5_' + Date.now()));
 
-      // Sync to local server if on localhost
+      // Save all monthly data blocks to localStorage
+      if (cloudData.monthlyData) {
+        for (const mKey in cloudData.monthlyData) {
+          if (cloudData.monthlyData[mKey] && Array.isArray(cloudData.monthlyData[mKey])) {
+            localStorage.setItem('ims_expenses_v2_' + mKey, JSON.stringify(cloudData.monthlyData[mKey]));
+          }
+        }
+        if (cloudData.monthlyData[activeMonth]) {
+          expenses = cloudData.monthlyData[activeMonth];
+        } else {
+          expenses = cloudData.expenses || [];
+        }
+      } else {
+        expenses = cloudData.expenses || [];
+      }
+      
+      // Save current month to localStorage
+      localStorage.setItem('ims_expenses_v2_' + activeMonth, JSON.stringify(expenses));
+
+      // Sync the entire fetched database directly to the local server if running on localhost
       if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
         try {
           await fetch(`${API_BASE}/api/sync-cloud`, {
@@ -31,7 +47,7 @@ async function syncFromCloud() {
       calculateMetrics();
       populateTable();
       renderCharts();
-      showToast("Successfully synced local data with cloud repository!", "success");
+      showToast("Successfully pulled and synced all months from cloud repository!", "success");
     } else {
       showToast("Failed to fetch cloud database", "error");
     }
@@ -41,22 +57,34 @@ async function syncFromCloud() {
   }
 }
 
-
 function exportDatabaseJSON() {
+  // Collect all local monthly data caches from localStorage
+  const localMonthlyData = {};
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i);
+    if (key && key.startsWith('ims_expenses_v2_')) {
+      const monthKey = key.replace('ims_expenses_v2_', '');
+      try {
+        localMonthlyData[monthKey] = JSON.parse(localStorage.getItem(key));
+      } catch(e) {}
+    }
+  }
+
   const exportData = {
-    dbVersion: 'v5_user_export_' + Date.now(),
+    dbVersion: 'v6_user_export_' + Date.now(),
     settings: settings,
-    expenses: expenses
+    expenses: expenses, // Master/current list
+    monthlyData: localMonthlyData
   };
 
   const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
   const downloadAnchor = document.createElement('a');
   downloadAnchor.setAttribute("href", dataStr);
-  downloadAnchor.setAttribute("download", `imstracker_backup_${activeMonth}_${Date.now()}.json`);
+  downloadAnchor.setAttribute("download", `imstracker_backup_full_${Date.now()}.json`);
   document.body.appendChild(downloadAnchor);
   downloadAnchor.click();
   downloadAnchor.remove();
-  showToast("Database exported successfully", "success");
+  showToast("Database exported successfully (includes all months)", "success");
 }
 
 function triggerImportJSON() {
@@ -68,25 +96,59 @@ function triggerImportJSON() {
     if (!file) return;
 
     const reader = new FileReader();
-    reader.onload = event => {
+    reader.onload = async event => {
       try {
         const imported = JSON.parse(event.target.result);
-        if (imported.expenses && Array.isArray(imported.expenses)) {
-          expenses = imported.expenses;
-          if (imported.settings) settings = imported.settings;
-          
-          persistExpensesToStorage();
-          try {
-            localStorage.setItem('ims_settings', JSON.stringify(settings));
-          } catch(err) {}
+        
+        // Validation: must have expenses or monthlyData
+        if (imported.expenses || imported.monthlyData) {
+          if (imported.settings) {
+            settings = imported.settings;
+            try {
+              localStorage.setItem('ims_settings', JSON.stringify(settings));
+            } catch(e) {}
+          }
+
+          // Import all monthly data blocks
+          if (imported.monthlyData) {
+            for (const mKey in imported.monthlyData) {
+              if (imported.monthlyData[mKey] && Array.isArray(imported.monthlyData[mKey])) {
+                localStorage.setItem('ims_expenses_v2_' + mKey, JSON.stringify(imported.monthlyData[mKey]));
+              }
+            }
+            if (imported.monthlyData[activeMonth]) {
+              expenses = imported.monthlyData[activeMonth];
+            } else {
+              expenses = imported.expenses || [];
+            }
+          } else if (imported.expenses && Array.isArray(imported.expenses)) {
+            expenses = imported.expenses;
+          }
+
+          // Save current month to localStorage
+          localStorage.setItem('ims_expenses_v2_' + activeMonth, JSON.stringify(expenses));
+          localStorage.setItem('ims_db_version', imported.dbVersion || ('v6_imported_' + Date.now()));
+
+          // Sync to local server if on localhost
+          if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+            try {
+              await fetch(`${API_BASE}/api/sync-cloud`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(imported)
+              });
+            } catch(apiErr) {
+              console.warn("Local API sync failed:", apiErr);
+            }
+          }
 
           updateSettingsDisplay();
           calculateMetrics();
           populateTable();
           renderCharts();
-          showToast("Database imported successfully", "success");
+          showToast("Database imported successfully (all months restored)", "success");
         } else {
-          showToast("Invalid JSON backup file", "error");
+          showToast("Invalid JSON backup file structure", "error");
         }
       } catch (err) {
         showToast("Error reading JSON file", "error");
@@ -96,6 +158,14 @@ function triggerImportJSON() {
   };
   input.click();
 }
+
+
+
+
+
+
+
+
 
 
 function resetToCloudData() {
