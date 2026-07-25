@@ -483,7 +483,6 @@ export const INITIAL_EXPENSES = [
     currency: "USD",
     amount: 135.24,
     recurring: "Monthly",
-    notes: "Invoice #5504784624 (Subtotal $117.60 + VAT 15%)"
   },
   {
     id: "exp-scl-2",

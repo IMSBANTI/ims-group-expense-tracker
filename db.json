@@ -501,20 +501,6 @@
       "extraBillingFrequency": "monthly"
     },
     {
-      "id": "scl-mail-2",
-      "entity": "SCL",
-      "category": "Mail",
-      "name": "Google Workspace Starter Usage (Invoice #5504784624)",
-      "email": "admin@scl.net.bd",
-      "price": 135.24,
-      "currency": "USD",
-      "dueDate": "Monthly",
-      "extraCreditCost": 0,
-      "details": "Tax Invoice #5504784624 ($117.60 subtotal + 15% VAT = $135.24 USD / 16,526.94 BDT)",
-      "billingFrequency": "monthly",
-      "extraBillingFrequency": "monthly"
-    },
-    {
       "id": "tp-mail-1",
       "entity": "TP",
       "category": "Mail",
