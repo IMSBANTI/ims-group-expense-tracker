@@ -298,11 +298,11 @@
       "email": "ims.net.bd",
       "price": 15000,
       "currency": "BDT",
-      "dueDate": "18th of each month",
+      "dueDate": "18th of billing month",
       "extraCreditCost": 400,
-      "details": "15,000 TK monthly cost + 400 TK card charge per transaction (Due 18th of each month)",
-      "billingFrequency": "monthly",
-      "extraBillingFrequency": "monthly"
+      "details": "15,000 TK yearly cost + 400 TK card charge per transaction (Due 18th of billing month)",
+      "billingFrequency": "yearly",
+      "extraBillingFrequency": "yearly"
     },
     {
       "id": "ims-dom-1",
@@ -805,11 +805,11 @@
         "email": "ims.net.bd",
         "price": 15000,
         "currency": "BDT",
-        "dueDate": "18th of each month",
+        "dueDate": "18th of billing month",
         "extraCreditCost": 400,
-        "details": "15,000 TK monthly cost + 400 TK card charge per transaction (Due 18th of each month)",
-        "billingFrequency": "monthly",
-        "extraBillingFrequency": "monthly"
+        "details": "15,000 TK yearly cost + 400 TK card charge per transaction (Due 18th of billing month)",
+        "billingFrequency": "yearly",
+        "extraBillingFrequency": "yearly"
       },
       {
         "id": "ims-dom-1",
