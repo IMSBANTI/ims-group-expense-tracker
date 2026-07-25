@@ -35,15 +35,38 @@ function readDB() {
 }
 
 // Helper to write database
+const { exec } = require('child_process');
 function writeDB(data) {
   try {
+    // 1. Write to public/db.json
     fs.writeFileSync(DB_PATH, JSON.stringify(data, null, 2), 'utf8');
+
+    // 2. Write to root db.json
+    const rootPath = path.join(__dirname, 'db.json');
+    fs.writeFileSync(rootPath, JSON.stringify(data, null, 2), 'utf8');
+
+    // 3. Write to dist/db.json
+    const distPath = path.join(__dirname, 'dist', 'db.json');
+    if (fs.existsSync(path.dirname(distPath))) {
+      fs.writeFileSync(distPath, JSON.stringify(data, null, 2), 'utf8');
+    }
+
+    // 4. Automatically commit and push to GitHub so cloud users see it!
+    exec('git add db.json public/db.json dist/db.json && git commit -m "Auto-update database from dashboard" && git push', { cwd: __dirname }, (error, stdout, stderr) => {
+      if (error) {
+        console.error("Git auto-push error:", error);
+      } else {
+        console.log("Git auto-push success:", stdout);
+      }
+    });
+
     return true;
   } catch (err) {
     console.error("Error writing database:", err);
     return false;
   }
 }
+
 
 // GET Settings
 app.get('/api/settings', (req, res) => {

@@ -282,11 +282,11 @@
       "category": "Mail",
       "name": "Google Workspace (ims.com.bd)",
       "email": "IMS Corporate Mail",
-      "price": 596.0,
+      "price": 570.0,
       "currency": "USD",
       "dueDate": "Monthly",
       "extraCreditCost": 0,
-      "details": "Google Workspace $596/mo (73,300 TK)",
+      "details": "Google Workspace $570/mo (Due Monthly)",
       "billingFrequency": "monthly",
       "extraBillingFrequency": "monthly"
     },
@@ -502,5 +502,5 @@
     }
   ],
   "monthlyData": {},
-  "dbVersion": "v5_monthly_dhaka_1784977736"
+  "dbVersion": "v6_ims_mail_570_1784978279"
 }
