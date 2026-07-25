@@ -1,4 +1,24 @@
 
+// Auto-purge TP items from browser LocalStorage
+(function purgeTPExpensesFromStorage() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.includes('ims')) {
+        let val = localStorage.getItem(key);
+        if (val && (val.includes('"entity":"TP"') || val.includes('"TP"'))) {
+          let data = JSON.parse(val);
+          if (Array.isArray(data)) {
+            const filtered = data.filter(item => item.entity !== 'TP');
+            localStorage.setItem(key, JSON.stringify(filtered));
+          }
+        }
+      }
+    }
+  } catch (e) {}
+})();
+
+
 // Auto-migrate cached localStorage CLAN Mail to $302 USD
 (function migrateClanMailStorage() {
   try {

@@ -499,36 +499,8 @@
       "details": "Google Workspace Starter 11 seats ($102/mo / 12,546 TK)",
       "billingFrequency": "monthly",
       "extraBillingFrequency": "monthly"
-    },
-    {
-      "id": "tp-mail-1",
-      "entity": "TP",
-      "category": "Mail",
-      "name": "Google Workspace Trade Pulse Allocation",
-      "email": "tradepulse.com",
-      "price": 21000,
-      "currency": "BDT",
-      "dueDate": "Monthly",
-      "extraCreditCost": 0,
-      "details": "Google Workspace Reallocated Portion from 28-User Pool",
-      "billingFrequency": "monthly",
-      "extraBillingFrequency": "monthly"
-    },
-    {
-      "id": "tp-ai-1",
-      "entity": "TP",
-      "category": "Monthly AI",
-      "name": "Trade Pulse ChatGPT Desk",
-      "email": "admin@tradepulse.com",
-      "price": 28.5,
-      "currency": "USD",
-      "dueDate": "Monthly",
-      "extraCreditCost": 0,
-      "details": "Trade Pulse ChatGPT Analytics Seat",
-      "billingFrequency": "monthly",
-      "extraBillingFrequency": "monthly"
     }
   ],
   "monthlyData": {},
-  "dbVersion": "v2_live_1784975956"
+  "dbVersion": "v3_no_tp_1784976248"
 }
