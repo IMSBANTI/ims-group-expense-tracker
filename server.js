@@ -45,14 +45,15 @@ function writeDB(data) {
     const rootPath = path.join(__dirname, 'db.json');
     fs.writeFileSync(rootPath, JSON.stringify(data, null, 2), 'utf8');
 
-    // 3. Write to dist/db.json
+    // 3. Write to dist/db.json (if exists)
     const distPath = path.join(__dirname, 'dist', 'db.json');
     if (fs.existsSync(path.dirname(distPath))) {
       fs.writeFileSync(distPath, JSON.stringify(data, null, 2), 'utf8');
     }
 
-    // 4. Automatically commit and push to GitHub so cloud users see it!
-    exec('git add db.json public/db.json dist/db.json && git commit -m "Auto-update database from dashboard" && git push', { cwd: __dirname }, (error, stdout, stderr) => {
+    // 4. Automatically commit and push to GitHub (both main and gh-pages branches)
+    const gitCommand = 'git add db.json public/db.json && git commit -m "Auto-update database from dashboard" && git push origin main --force && git push origin main:gh-pages --force';
+    exec(gitCommand, { cwd: __dirname }, (error, stdout, stderr) => {
       if (error) {
         console.error("Git auto-push error:", error);
       } else {
@@ -356,7 +357,20 @@ app.delete('/api/expenses/:id', (req, res) => {
   } else {
     res.status(500).json({ error: "Failed to write database" });
   }
+// POST Sync from Cloud
+app.post('/api/sync-cloud', (req, res) => {
+  const db = req.body;
+  if (!db || !db.expenses) {
+    return res.status(400).json({ error: "Invalid database structure received" });
+  }
+
+  if (writeDB(db)) {
+    res.json({ message: "Local database successfully synced with cloud repository" });
+  } else {
+    res.status(500).json({ error: "Failed to write synced cloud database to disk" });
+  }
 });
+
 
 
 app.listen(PORT, '0.0.0.0', () => {

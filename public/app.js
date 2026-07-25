@@ -1,4 +1,47 @@
 
+async function syncFromCloud() {
+  if (!confirm("Pull latest database from GitHub cloud repository and update local server?")) return;
+  
+  try {
+    const res = await fetch('https://imsbanti.github.io/imstracker/db.json?v=' + Date.now());
+    if (res.ok) {
+      const cloudData = await res.json();
+      
+      expenses = cloudData.expenses || [];
+      settings = cloudData.settings || { usd_to_bdt: 124, eur_to_bdt: 141 };
+      
+      localStorage.setItem('ims_expenses_v2_' + activeMonth, JSON.stringify(expenses));
+      localStorage.setItem('ims_settings', JSON.stringify(settings));
+      localStorage.setItem('ims_db_version', cloudData.dbVersion || '1.0.5');
+
+      // Sync to local server if on localhost
+      if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+        try {
+          await fetch(`${API_BASE}/api/sync-cloud`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(cloudData)
+          });
+        } catch(apiErr) {
+          console.warn("Local API sync failed:", apiErr);
+        }
+      }
+
+      updateSettingsDisplay();
+      calculateMetrics();
+      populateTable();
+      renderCharts();
+      showToast("Successfully synced local data with cloud repository!", "success");
+    } else {
+      showToast("Failed to fetch cloud database", "error");
+    }
+  } catch (err) {
+    console.error(err);
+    showToast("Error syncing from cloud repository", "error");
+  }
+}
+
+
 function exportDatabaseJSON() {
   const exportData = {
     dbVersion: 'v5_user_export_' + Date.now(),
