@@ -62,7 +62,7 @@
       "currency": "USD",
       "dueDate": "Monthly",
       "extraCreditCost": 10,
-      "details": "ChatGPT Plus ($28.50) + Extra Credit ($10 / 1,230 TK)",
+      "details": "ChatGPT Plus ($28.50) + Extra Cost ($10 / 1,230 TK)",
       "billingFrequency": "monthly",
       "extraBillingFrequency": "monthly"
     },
@@ -132,7 +132,7 @@
       "currency": "EUR",
       "dueDate": "Monthly",
       "extraCreditCost": 320,
-      "details": "Magnific AI (\u20ac25.50/mo) + Yearly Extra Credit 600k (\u20ac320/yr / 45,120 TK)",
+      "details": "Magnific AI (\u20ac25.50/mo) + Yearly Extra Cost 600k (\u20ac320/yr / 45,120 TK)",
       "billingFrequency": "monthly",
       "extraBillingFrequency": "yearly"
     },

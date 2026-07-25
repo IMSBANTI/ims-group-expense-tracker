@@ -107,7 +107,7 @@ export const INITIAL_EXPENSES = [
     currency: "USD",
     amount: 28.50,
     recurring: "Monthly",
-    notes: "Includes extra credit allocation"
+    notes: "Includes extra cost allocation"
   },
   {
     id: "exp-ims-3",

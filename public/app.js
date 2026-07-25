@@ -1189,7 +1189,7 @@ function generateReport() {
             <th align="left" style="border-bottom: 1px solid #cbd5e1;">Item / User</th>
             <th align="left" style="border-bottom: 1px solid #cbd5e1;">Email</th>
             <th align="right" style="border-bottom: 1px solid #cbd5e1;">Cost (Original)</th>
-            <th align="right" style="border-bottom: 1px solid #cbd5e1;">Extra Credits</th>
+            <th align="right" style="border-bottom: 1px solid #cbd5e1;">Extra Costs</th>
             <th align="right" style="border-bottom: 1px solid #cbd5e1;">Total (BDT)</th>
           </tr>
         </thead>
