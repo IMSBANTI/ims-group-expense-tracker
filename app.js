@@ -4,28 +4,28 @@
 const ENTITY_CONFIG = {
   'IMS': {
     fullName: "Integrated Marketing Service Ltd.",
-    logo: "/assets/ims_logo.png",
+    logo: "assets/ims_logo.png",
     color: "#ef4444", // Red
     class: "badge-entity-ims",
     glowClass: "ims-glow"
   },
   'CLAN': {
     fullName: "Country's Largest Audience Network",
-    logo: "/assets/clan_logo.png",
+    logo: "assets/clan_logo.png",
     color: "#f97316", // Orange
     class: "badge-entity-clan",
     glowClass: "clan-glow"
   },
   'SCL': {
     fullName: "Sales Connect Ltd",
-    logo: "/assets/scl_logo.png",
+    logo: "assets/scl_logo.png",
     color: "#881337", // Burgundy
     class: "badge-entity-scl",
     glowClass: "scl-glow"
   },
   'TP': {
     fullName: "Trade Pulse",
-    logo: "/assets/tp_logo.png",
+    logo: "assets/tp_logo.png",
     color: "#059669", // Teal/Green
     class: "badge-entity-tp",
     glowClass: "tp-glow"
@@ -54,10 +54,10 @@ let categoryChart = null;
 // ==========================================================================
 let customCategoriesList = ["Monthly AI", "Software", "Internet", "Mail", "Domain"];
 let customEntitiesList = [
-  { code: "IMS", fullName: "Integrated Marketing Service Ltd.", color: "#ef4444", logo: "/assets/ims_logo.png" },
-  { code: "CLAN", fullName: "Country's Largest Audience Network", color: "#f97316", logo: "/assets/clan_logo.png" },
-  { code: "SCL", fullName: "Sales Connect Ltd", color: "#881337", logo: "/assets/scl_logo.png" },
-  { code: "TP", fullName: "Trade Pulse", color: "#059669", logo: "/assets/tp_logo.png" }
+  { code: "IMS", fullName: "Integrated Marketing Service Ltd.", color: "#ef4444", logo: "assets/ims_logo.png" },
+  { code: "CLAN", fullName: "Country's Largest Audience Network", color: "#f97316", logo: "assets/clan_logo.png" },
+  { code: "SCL", fullName: "Sales Connect Ltd", color: "#881337", logo: "assets/scl_logo.png" },
+  { code: "TP", fullName: "Trade Pulse", color: "#059669", logo: "assets/tp_logo.png" }
 ];
 
 document.addEventListener('DOMContentLoaded', () => {

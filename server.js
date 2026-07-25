@@ -72,10 +72,10 @@ app.post('/api/settings', (req, res) => {
 // Default categories & entities lists
 const DEFAULT_CATEGORIES = ["Monthly AI", "Software", "Internet", "Mail", "Domain"];
 const DEFAULT_ENTITIES = [
-  { code: "IMS", fullName: "Integrated Marketing Service Ltd.", color: "#ef4444", logo: "/assets/ims_logo.png" },
-  { code: "CLAN", fullName: "Country's Largest Audience Network", color: "#f97316", logo: "/assets/clan_logo.png" },
-  { code: "SCL", fullName: "Sales Connect Ltd", color: "#881337", logo: "/assets/scl_logo.png" },
-  { code: "TP", fullName: "Trade Pulse", color: "#059669", logo: "/assets/tp_logo.png" }
+  { code: "IMS", fullName: "Integrated Marketing Service Ltd.", color: "#ef4444", logo: "assets/ims_logo.png" },
+  { code: "CLAN", fullName: "Country's Largest Audience Network", color: "#f97316", logo: "assets/clan_logo.png" },
+  { code: "SCL", fullName: "Sales Connect Ltd", color: "#881337", logo: "assets/scl_logo.png" },
+  { code: "TP", fullName: "Trade Pulse", color: "#059669", logo: "assets/tp_logo.png" }
 ];
 
 // GET Categories

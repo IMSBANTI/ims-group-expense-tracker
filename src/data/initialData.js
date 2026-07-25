@@ -3,7 +3,7 @@ export const DEFAULT_COMPANIES = [
     id: "ims",
     name: "Integrated Marketing Service Ltd",
     code: "IMS",
-    logo: "/assets/IMS.png",
+    logo: "assets/IMS.png",
     accentColor: "#3b82f6",
     description: "IMS Main Operations & Head Office"
   },
@@ -11,7 +11,7 @@ export const DEFAULT_COMPANIES = [
     id: "clan",
     name: "Country's Largest Audience Network",
     code: "CLAN",
-    logo: "/assets/CLAN.png",
+    logo: "assets/CLAN.png",
     accentColor: "#10b981",
     description: "CLAN Media & Content Network"
   },
@@ -19,7 +19,7 @@ export const DEFAULT_COMPANIES = [
     id: "scl",
     name: "Sales Connect Limited",
     code: "SCL",
-    logo: "/assets/SCL.png",
+    logo: "assets/SCL.png",
     accentColor: "#f59e0b",
     description: "SCL Sales & Commerce Operations"
   },
@@ -27,7 +27,7 @@ export const DEFAULT_COMPANIES = [
     id: "tp",
     name: "Trade Pulse",
     code: "TP",
-    logo: "/assets/Trade-Pulse.png",
+    logo: "assets/Trade-Pulse.png",
     accentColor: "#8b5cf6",
     description: "Trade Pulse Analytics & Trade Solutions"
   }

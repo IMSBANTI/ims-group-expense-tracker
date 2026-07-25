@@ -764,7 +764,7 @@ function setupSettingsModalListeners() {
     e.preventDefault();
     const code = document.getElementById("new-comp-code").value.toUpperCase();
     const name = document.getElementById("new-comp-name").value;
-    const logo = document.getElementById("new-comp-logo").value || "/assets/IMS.png";
+    const logo = document.getElementById("new-comp-logo").value || "assets/IMS.png";
 
     const id = code.toLowerCase().replace(/[^a-z0-9]/g, '');
     state.companies.push({ id, code, name, logo, accentColor: "#3b82f6" });
