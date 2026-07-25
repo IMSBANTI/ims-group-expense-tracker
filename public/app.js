@@ -548,8 +548,9 @@ async function fetchSettings() {
 
 
 
+
 async function saveSettings(e) {
-  e.preventDefault();
+  if (e) e.preventDefault();
   const rateUSD = parseFloat(document.getElementById('rate-usd').value);
   const rateEUR = parseFloat(document.getElementById('rate-eur').value);
 
@@ -558,29 +559,33 @@ async function saveSettings(e) {
     return;
   }
 
+  // Update in-memory settings & persist to LocalStorage
+  settings = { usd_to_bdt: rateUSD, eur_to_bdt: rateEUR };
   try {
-    const res = await fetch(`${API_BASE}/api/settings`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ usd_to_bdt: rateUSD, eur_to_bdt: rateEUR })
-    });
+    localStorage.setItem('ims_settings', JSON.stringify(settings));
+  } catch (err) {}
 
-    if (!res.ok) throw new Error("Failed to save settings");
-    const data = await res.json();
-    settings = data.settings;
-    updateSettingsDisplay();
-    closeSettingsModal();
-    showToast("Exchange rates updated successfully", "success");
-    
-    // Recalculate and refresh UI
-    calculateMetrics();
-    populateTable();
-    renderCharts();
+  updateSettingsDisplay();
+  closeSettingsModal();
+  calculateMetrics();
+  populateTable();
+  renderCharts();
+  showToast("Exchange rates updated successfully", "success");
+
+  // Optional backend API sync (silent catch for static hosts like GitHub Pages)
+  try {
+    if (API_BASE || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      await fetch(`${API_BASE}/api/settings`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ usd_to_bdt: rateUSD, eur_to_bdt: rateEUR })
+      });
+    }
   } catch (err) {
-    showToast("Error updating settings", "error");
-    console.error(err);
+    console.log("Backend settings sync skipped (static mode active)");
   }
 }
+
 
 // ==========================================================================
 // CALCULATION & METRICS
