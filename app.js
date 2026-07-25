@@ -113,21 +113,33 @@ async function deleteExpense(id) {
   }
 }
 
+
 async function saveExpense(event) {
   if (event) event.preventDefault();
 
-  const id = document.getElementById('expense-id').value || 'exp-' + Date.now();
-  const entity = document.getElementById('expense-entity').value;
-  const category = document.getElementById('expense-category').value;
-  const name = document.getElementById('expense-name').value;
-  const email = document.getElementById('expense-email').value;
-  const price = parseFloat(document.getElementById('expense-price').value) || 0;
-  const currency = document.getElementById('expense-currency').value;
-  const dueDate = document.getElementById('expense-due-date').value || 'Monthly';
-  const extraCreditCost = parseFloat(document.getElementById('expense-extra-cost').value) || 0;
-  const billingFrequency = document.getElementById('expense-billing-frequency').value || 'monthly';
-  const extraBillingFrequency = document.getElementById('expense-extra-billing-frequency').value || 'monthly';
-  const details = document.getElementById('expense-details').value || '';
+  const getVal = (id) => {
+    const el = document.getElementById(id) || document.getElementById(id.replace('field-', 'expense-'));
+    return el ? el.value : '';
+  };
+
+  const rawId = getVal('field-id');
+  const id = rawId ? String(rawId) : ('exp-' + Date.now());
+  const entity = getVal('field-entity') || 'IMS';
+  const category = getVal('field-category') || 'General';
+  const name = getVal('field-name') || 'Unnamed Expense';
+  const email = getVal('field-email') || '';
+  const price = parseFloat(getVal('field-price')) || 0;
+  const currency = getVal('field-currency') || 'BDT';
+  const dueDate = getVal('field-due-date') || 'Monthly';
+  const extraCreditCost = parseFloat(getVal('field-extra-cost')) || 0;
+  const billingFrequency = getVal('field-billing-frequency') || 'monthly';
+  const extraBillingFrequency = getVal('field-extra-billing-frequency') || 'monthly';
+  const details = getVal('field-details') || '';
+
+  const perUserEl = document.getElementById('field-is-per-user') || document.getElementById('expense-is-per-user');
+  const isPerUser = perUserEl ? perUserEl.checked : false;
+  const userCount = parseInt(getVal('field-user-count')) || 0;
+  const costPerUser = parseFloat(getVal('field-cost-per-user')) || 0;
 
   const newExpense = {
     id,
@@ -141,7 +153,10 @@ async function saveExpense(event) {
     extraCreditCost,
     details,
     billingFrequency,
-    extraBillingFrequency
+    extraBillingFrequency,
+    isPerUser,
+    userCount,
+    costPerUser
   };
 
   const existingIdx = expenses.findIndex(e => String(e.id) === String(id));
@@ -160,7 +175,6 @@ async function saveExpense(event) {
   renderCharts();
   showToast(isEditing ? "Expense updated successfully" : "New expense added successfully", "success");
 
-  // Optional backend sync using PUT for edit, POST for add
   try {
     if (API_BASE || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       const url = isEditing 
@@ -178,6 +192,7 @@ async function saveExpense(event) {
     console.log("Backend save sync skipped (static mode active)");
   }
 }
+
 
 
 // Helper to persist expenses to LocalStorage
