@@ -542,5 +542,6 @@
       "billingFrequency": "monthly",
       "extraBillingFrequency": "monthly"
     }
-  ]
+  ],
+  "monthlyData": {}
 }
