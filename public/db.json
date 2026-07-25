@@ -132,7 +132,7 @@
       "currency": "EUR",
       "dueDate": "Monthly",
       "extraCreditCost": 320,
-      "details": "Magnific AI (€25.50/mo) + Yearly Extra Credit 600k (€320/yr / 45,120 TK)",
+      "details": "Magnific AI (\u20ac25.50/mo) + Yearly Extra Credit 600k (\u20ac320/yr / 45,120 TK)",
       "billingFrequency": "monthly",
       "extraBillingFrequency": "yearly"
     },
@@ -296,12 +296,12 @@
       "category": "Mail",
       "name": "Dhaka WebHost Mail",
       "email": "ims.net.bd",
-      "price": 15400,
+      "price": 15000,
       "currency": "BDT",
-      "dueDate": "Yearly",
-      "extraCreditCost": 0,
-      "details": "Mail Server Hosting (ims.net.bd)",
-      "billingFrequency": "yearly",
+      "dueDate": "18th of each month",
+      "extraCreditCost": 400,
+      "details": "15,000 TK monthly cost + 400 TK card charge per transaction (Due 18th of each month)",
+      "billingFrequency": "monthly",
       "extraBillingFrequency": "monthly"
     },
     {
@@ -639,7 +639,7 @@
         "currency": "EUR",
         "dueDate": "Monthly",
         "extraCreditCost": 320,
-        "details": "Magnific AI (€25.50/mo) + Yearly Extra Credit 600k (€320/yr / 45,120 TK)",
+        "details": "Magnific AI (\u20ac25.50/mo) + Yearly Extra Credit 600k (\u20ac320/yr / 45,120 TK)",
         "billingFrequency": "monthly",
         "extraBillingFrequency": "yearly"
       },
@@ -1126,7 +1126,7 @@
         "currency": "EUR",
         "dueDate": "Monthly",
         "extraCreditCost": 320,
-        "details": "Magnific AI (€25.50/mo) + Yearly Extra Credit 600k (€320/yr / 45,120 TK)",
+        "details": "Magnific AI (\u20ac25.50/mo) + Yearly Extra Credit 600k (\u20ac320/yr / 45,120 TK)",
         "billingFrequency": "monthly",
         "extraBillingFrequency": "yearly"
       },

@@ -296,12 +296,12 @@
       "category": "Mail",
       "name": "Dhaka WebHost Mail",
       "email": "ims.net.bd",
-      "price": 15400,
+      "price": 15000,
       "currency": "BDT",
-      "dueDate": "Yearly",
-      "extraCreditCost": 0,
-      "details": "Mail Server Hosting (ims.net.bd)",
-      "billingFrequency": "yearly",
+      "dueDate": "18th of each month",
+      "extraCreditCost": 400,
+      "details": "15,000 TK monthly cost + 400 TK card charge per transaction (Due 18th of each month)",
+      "billingFrequency": "monthly",
       "extraBillingFrequency": "monthly"
     },
     {
