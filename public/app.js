@@ -1,4 +1,60 @@
 
+function exportDatabaseJSON() {
+  const exportData = {
+    dbVersion: 'v5_user_export_' + Date.now(),
+    settings: settings,
+    expenses: expenses
+  };
+
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportData, null, 2));
+  const downloadAnchor = document.createElement('a');
+  downloadAnchor.setAttribute("href", dataStr);
+  downloadAnchor.setAttribute("download", `imstracker_backup_${activeMonth}_${Date.now()}.json`);
+  document.body.appendChild(downloadAnchor);
+  downloadAnchor.click();
+  downloadAnchor.remove();
+  showToast("Database exported successfully", "success");
+}
+
+function triggerImportJSON() {
+  const input = document.createElement('input');
+  input.type = 'file';
+  input.accept = '.json';
+  input.onchange = e => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = event => {
+      try {
+        const imported = JSON.parse(event.target.result);
+        if (imported.expenses && Array.isArray(imported.expenses)) {
+          expenses = imported.expenses;
+          if (imported.settings) settings = imported.settings;
+          
+          persistExpensesToStorage();
+          try {
+            localStorage.setItem('ims_settings', JSON.stringify(settings));
+          } catch(err) {}
+
+          updateSettingsDisplay();
+          calculateMetrics();
+          populateTable();
+          renderCharts();
+          showToast("Database imported successfully", "success");
+        } else {
+          showToast("Invalid JSON backup file", "error");
+        }
+      } catch (err) {
+        showToast("Error reading JSON file", "error");
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
+}
+
+
 function resetToCloudData() {
   if (confirm("Reset local cache and reload fresh data from cloud server?")) {
     try {
