@@ -205,13 +205,14 @@ app.get('/api/expenses', (req, res) => {
   res.json(expensesList);
 });
 
-// POST Expense
+
+// POST Expense (Add or Update)
 app.post('/api/expenses', (req, res) => {
   const db = readDB();
   const monthKey = req.query.month || req.body.month || (new Date().toISOString().substring(0, 7));
   const expensesList = getExpensesForMonth(db, monthKey);
 
-  const { entity, category, name, email, price, currency, dueDate, extraCreditCost, details, billingFrequency, extraBillingFrequency, isPerUser, userCount, costPerUser } = req.body;
+  const { id, entity, category, name, email, price, currency, dueDate, extraCreditCost, details, billingFrequency, extraBillingFrequency, isPerUser, userCount, costPerUser } = req.body;
 
   if (!entity || !category || !name || price === undefined || !currency) {
     return res.status(400).json({ error: "Missing required fields (entity, category, name, price, currency)" });
@@ -222,8 +223,9 @@ app.post('/api/expenses', (req, res) => {
     return res.status(400).json({ error: "Price must be a valid number" });
   }
 
-  const newExpense = {
-    id: String(Date.now()), // Unique timestamp-based ID
+  const expenseId = id ? String(id) : 'exp-' + Date.now();
+  const updatedExpense = {
+    id: expenseId,
     entity,
     category,
     name,
@@ -240,47 +242,48 @@ app.post('/api/expenses', (req, res) => {
     costPerUser: parseFloat(costPerUser || 0)
   };
 
-  expensesList.push(newExpense);
+  const index = expensesList.findIndex(e => String(e.id) === expenseId);
+  if (index >= 0) {
+    expensesList[index] = updatedExpense;
+  } else {
+    expensesList.unshift(updatedExpense);
+  }
+
   db.monthlyData[monthKey] = expensesList;
-  
+
+  // Also sync master expenses list
+  const masterIdx = db.expenses.findIndex(e => String(e.id) === expenseId);
+  if (masterIdx >= 0) {
+    db.expenses[masterIdx] = updatedExpense;
+  } else {
+    db.expenses.unshift(updatedExpense);
+  }
+
   if (writeDB(db)) {
-    res.status(201).json(newExpense);
+    res.status(201).json(updatedExpense);
   } else {
     res.status(500).json({ error: "Failed to write database" });
   }
 });
 
-// PUT Expense
+// PUT Expense (Update)
 app.put('/api/expenses/:id', (req, res) => {
   const db = readDB();
-  const id = req.params.id;
+  const id = String(req.params.id);
   const monthKey = req.query.month || req.body.month || (new Date().toISOString().substring(0, 7));
   const expensesList = getExpensesForMonth(db, monthKey);
-  const index = expensesList.findIndex(e => String(e.id) === String(id));
-
-  if (index === -1) {
-    return res.status(404).json({ error: "Expense not found for this month" });
-  }
 
   const { entity, category, name, email, price, currency, dueDate, extraCreditCost, details, billingFrequency, extraBillingFrequency, isPerUser, userCount, costPerUser } = req.body;
 
-  if (!entity || !category || !name || price === undefined || !currency) {
-    return res.status(400).json({ error: "Missing required fields (entity, category, name, price, currency)" });
-  }
-
   const priceNum = parseFloat(price);
-  if (isNaN(priceNum)) {
-    return res.status(400).json({ error: "Price must be a number" });
-  }
-
-  expensesList[index] = {
+  const updatedExpense = {
     id,
     entity,
     category,
     name,
     email: email || "",
-    price: priceNum,
-    currency,
+    price: isNaN(priceNum) ? 0 : priceNum,
+    currency: currency || "BDT",
     dueDate: dueDate || "Monthly",
     extraCreditCost: parseFloat(extraCreditCost || 0),
     details: details || "",
@@ -291,10 +294,23 @@ app.put('/api/expenses/:id', (req, res) => {
     costPerUser: parseFloat(costPerUser || 0)
   };
 
+  const index = expensesList.findIndex(e => String(e.id) === id);
+  if (index >= 0) {
+    expensesList[index] = updatedExpense;
+  } else {
+    expensesList.unshift(updatedExpense);
+  }
   db.monthlyData[monthKey] = expensesList;
 
+  const masterIdx = db.expenses.findIndex(e => String(e.id) === id);
+  if (masterIdx >= 0) {
+    db.expenses[masterIdx] = updatedExpense;
+  } else {
+    db.expenses.unshift(updatedExpense);
+  }
+
   if (writeDB(db)) {
-    res.json(expensesList[index]);
+    res.json(updatedExpense);
   } else {
     res.status(500).json({ error: "Failed to write database" });
   }
@@ -303,17 +319,14 @@ app.put('/api/expenses/:id', (req, res) => {
 // DELETE Expense
 app.delete('/api/expenses/:id', (req, res) => {
   const db = readDB();
-  const id = req.params.id;
+  const id = String(req.params.id);
   const monthKey = req.query.month || (new Date().toISOString().substring(0, 7));
   const expensesList = getExpensesForMonth(db, monthKey);
-  const index = expensesList.findIndex(e => String(e.id) === String(id));
 
-  if (index === -1) {
-    return res.status(404).json({ error: "Expense not found for this month" });
-  }
+  const newMonthlyList = expensesList.filter(e => String(e.id) !== id);
+  db.monthlyData[monthKey] = newMonthlyList;
 
-  expensesList.splice(index, 1);
-  db.monthlyData[monthKey] = expensesList;
+  db.expenses = db.expenses.filter(e => String(e.id) !== id);
 
   if (writeDB(db)) {
     res.json({ message: "Expense deleted successfully" });
@@ -321,6 +334,7 @@ app.delete('/api/expenses/:id', (req, res) => {
     res.status(500).json({ error: "Failed to write database" });
   }
 });
+
 
 app.listen(PORT, '0.0.0.0', () => {
   console.log(`Server is running on http://localhost:${PORT}`);

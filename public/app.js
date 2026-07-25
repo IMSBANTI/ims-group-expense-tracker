@@ -1,18 +1,71 @@
 
-// Helper to persist expenses to LocalStorage
 function persistExpensesToStorage() {
   try {
-    localStorage.setItem('ims_monthly_data_' + activeMonth, JSON.stringify(expenses));
+    localStorage.setItem('ims_expenses_v2_' + activeMonth, JSON.stringify(expenses));
     localStorage.setItem('ims_expenses_v2', JSON.stringify(expenses));
   } catch (e) {
     console.warn("LocalStorage save warning:", e);
   }
 }
 
+async function fetchExpenses() {
+  try {
+    let loadedData = false;
+    
+    // Check if user has saved modified state in LocalStorage for this month
+    const localSaved = localStorage.getItem('ims_expenses_v2_' + activeMonth) || localStorage.getItem('ims_expenses_v2');
+    if (localSaved) {
+      try {
+        const parsed = JSON.parse(localSaved);
+        if (Array.isArray(parsed)) {
+          expenses = parsed;
+          loadedData = true;
+        }
+      } catch(e) {}
+    }
+
+    if (!loadedData) {
+      if (isReadOnly) {
+        const res = await fetch('db.json');
+        if (res.ok) {
+          const data = await res.json();
+          if (data.monthlyData && data.monthlyData[activeMonth] && data.monthlyData[activeMonth].length > 0) {
+            expenses = data.monthlyData[activeMonth];
+          } else {
+            expenses = data.expenses || [];
+          }
+          settings = data.settings || { usd_to_bdt: 123, eur_to_bdt: 135 };
+          updateSettingsDisplay();
+          loadedData = true;
+        }
+      } else {
+        try {
+          const res = await fetch(`${API_BASE}/api/expenses?month=${activeMonth}`);
+          if (res.ok) {
+            const apiExp = await res.json();
+            if (Array.isArray(apiExp) && apiExp.length > 0) {
+              expenses = apiExp;
+              loadedData = true;
+            }
+          }
+        } catch (apiErr) {
+          console.warn("API fetch failed:", apiErr);
+        }
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching expenses:", err);
+  }
+
+  updateSettingsDisplay();
+  calculateMetrics();
+  populateTable();
+  renderCharts();
+}
+
 async function deleteExpense(id) {
   if (!confirm("Are you sure you want to delete this expense item?")) return;
 
-  // Instant local state & storage update
   expenses = expenses.filter(e => String(e.id) !== String(id));
   persistExpensesToStorage();
   calculateMetrics();
@@ -20,7 +73,6 @@ async function deleteExpense(id) {
   renderCharts();
   showToast("Expense item deleted successfully", "success");
 
-  // Optional backend sync (fails silently on static hosts like GitHub Pages)
   try {
     if (API_BASE || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
       await fetch(`${API_BASE}/api/expenses/${id}?month=${activeMonth}`, { method: 'DELETE' });
@@ -62,7 +114,9 @@ async function saveExpense(event) {
   };
 
   const existingIdx = expenses.findIndex(e => String(e.id) === String(id));
-  if (existingIdx >= 0) {
+  const isEditing = (existingIdx >= 0);
+
+  if (isEditing) {
     expenses[existingIdx] = newExpense;
   } else {
     expenses.unshift(newExpense);
@@ -73,13 +127,18 @@ async function saveExpense(event) {
   calculateMetrics();
   populateTable();
   renderCharts();
-  showToast(existingIdx >= 0 ? "Expense updated successfully" : "New expense added successfully", "success");
+  showToast(isEditing ? "Expense updated successfully" : "New expense added successfully", "success");
 
-  // Optional backend sync
+  // Optional backend sync using PUT for edit, POST for add
   try {
     if (API_BASE || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
-      await fetch(`${API_BASE}/api/expenses?month=${activeMonth}`, {
-        method: 'POST',
+      const url = isEditing 
+        ? `${API_BASE}/api/expenses/${id}?month=${activeMonth}`
+        : `${API_BASE}/api/expenses?month=${activeMonth}`;
+      const method = isEditing ? 'PUT' : 'POST';
+
+      await fetch(url, {
+        method,
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newExpense)
       });
@@ -88,6 +147,14 @@ async function saveExpense(event) {
     console.log("Backend save sync skipped (static mode active)");
   }
 }
+
+
+// Helper to persist expenses to LocalStorage
+
+
+
+
+
 
 
 // Logo Path Normalizer & Storage Sanitizer
@@ -400,66 +467,7 @@ async function fetchSettings() {
   }
 }
 
-async function fetchExpenses() {
-  try {
-    let loadedData = false;
-    if (isReadOnly) {
-      const res = await fetch('db.json');
-      if (res.ok) {
-        const data = await res.json();
-        if (data.monthlyData && data.monthlyData[activeMonth] && data.monthlyData[activeMonth].length > 0) {
-          expenses = data.monthlyData[activeMonth];
-        } else {
-          expenses = data.expenses || [];
-        }
-        settings = data.settings || { usd_to_bdt: 120, eur_to_bdt: 130 };
-        updateSettingsDisplay();
-        loadedData = true;
-      }
-    } else {
-      try {
-        const res = await fetch(`${API_BASE}/api/expenses?month=${activeMonth}`);
-        if (res.ok) {
-          expenses = await res.json();
-          if (Array.isArray(expenses) && expenses.length > 0) {
-            loadedData = true;
-          }
-        }
-      } catch (apiErr) {
-        console.warn("API fetch failed, trying static fallback:", apiErr);
-      }
 
-      // Fallback if API fails or returns empty array
-      if (!loadedData) {
-        try {
-          const res = await fetch('db.json');
-          if (res.ok) {
-            const data = await res.json();
-            if (data.monthlyData && data.monthlyData[activeMonth] && data.monthlyData[activeMonth].length > 0) {
-              expenses = data.monthlyData[activeMonth];
-            } else {
-              expenses = data.expenses || [];
-            }
-            if (data.settings) {
-              settings = data.settings;
-              updateSettingsDisplay();
-            }
-            loadedData = true;
-          }
-        } catch (dbErr) {
-          console.error("Fallback to db.json failed:", dbErr);
-        }
-      }
-    }
-
-    calculateMetrics();
-    populateTable();
-    renderCharts();
-  } catch (err) {
-    showToast("Error fetching expenses data", "error");
-    console.error(err);
-  }
-}
 
 async function saveSettings(e) {
   e.preventDefault();
