@@ -1,4 +1,65 @@
 
+function resetToCloudData() {
+  if (confirm("Reset local cache and reload fresh data from cloud server?")) {
+    try {
+      localStorage.clear();
+    } catch(e) {}
+    window.location.reload();
+  }
+}
+
+async function fetchExpenses() {
+  try {
+    let loadedData = false;
+
+    // Always fetch live db.json from server first
+    try {
+      const res = await fetch('db.json?v=' + Date.now());
+      if (res.ok) {
+        const serverData = await res.json();
+        const serverVersion = serverData.dbVersion || ('v4_' + Date.now());
+        const savedVersion = localStorage.getItem('ims_db_version');
+
+        // Force update if dbVersion changed or no local edits
+        if (!savedVersion || savedVersion !== serverVersion) {
+          if (serverData.monthlyData && serverData.monthlyData[activeMonth] && serverData.monthlyData[activeMonth].length > 0) {
+            expenses = serverData.monthlyData[activeMonth];
+          } else {
+            expenses = serverData.expenses || [];
+          }
+          settings = serverData.settings || { usd_to_bdt: 123, eur_to_bdt: 135 };
+          localStorage.setItem('ims_expenses_v2_' + activeMonth, JSON.stringify(expenses));
+          localStorage.setItem('ims_db_version', serverVersion);
+          loadedData = true;
+        }
+      }
+    } catch (e) {
+      console.warn("Could not fetch remote db.json:", e);
+    }
+
+    if (!loadedData) {
+      const localSaved = localStorage.getItem('ims_expenses_v2_' + activeMonth);
+      if (localSaved) {
+        try {
+          const parsed = JSON.parse(localSaved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            expenses = parsed;
+            loadedData = true;
+          }
+        } catch(e) {}
+      }
+    }
+  } catch (err) {
+    console.error("Error fetching expenses:", err);
+  }
+
+  updateSettingsDisplay();
+  calculateMetrics();
+  populateTable();
+  renderCharts();
+}
+
+
 // Auto-purge TP items from browser LocalStorage
 (function purgeTPExpensesFromStorage() {
   try {
@@ -60,71 +121,7 @@ function persistExpensesToStorage() {
 }
 
 
-async function fetchExpenses() {
-  try {
-    let loadedData = false;
 
-    // 1. Fetch live db.json from server with cache-buster
-    try {
-      const res = await fetch('db.json?v=' + Date.now());
-      if (res.ok) {
-        const serverData = await res.json();
-        const serverVersion = serverData.dbVersion || '1.0.5';
-        const savedVersion = localStorage.getItem('ims_db_version');
-
-        // If local storage is uninitialized or older version, sync to server db.json
-        if (!savedVersion || savedVersion !== serverVersion) {
-          if (serverData.monthlyData && serverData.monthlyData[activeMonth] && serverData.monthlyData[activeMonth].length > 0) {
-            expenses = serverData.monthlyData[activeMonth];
-          } else {
-            expenses = serverData.expenses || [];
-          }
-          settings = serverData.settings || { usd_to_bdt: 123, eur_to_bdt: 135 };
-          localStorage.setItem('ims_expenses_v2_' + activeMonth, JSON.stringify(expenses));
-          localStorage.setItem('ims_db_version', serverVersion);
-          loadedData = true;
-        }
-      }
-    } catch (e) {
-      console.warn("Could not fetch remote db.json:", e);
-    }
-
-    // 2. Fallback to LocalStorage if not loaded from fresh db.json
-    if (!loadedData) {
-      const localSaved = localStorage.getItem('ims_expenses_v2_' + activeMonth) || localStorage.getItem('ims_expenses_v2');
-      if (localSaved) {
-        try {
-          const parsed = JSON.parse(localSaved);
-          if (Array.isArray(parsed) && parsed.length > 0) {
-            expenses = parsed;
-            loadedData = true;
-          }
-        } catch(e) {}
-      }
-    }
-
-    // 3. Backend API sync if running Node server on localhost
-    if (!loadedData && !isReadOnly) {
-      try {
-        const res = await fetch(`${API_BASE}/api/expenses?month=${activeMonth}`);
-        if (res.ok) {
-          const apiExp = await res.json();
-          if (Array.isArray(apiExp) && apiExp.length > 0) {
-            expenses = apiExp;
-            loadedData = true;
-          }
-        }
-      } catch (apiErr) {}
-    }
-  } catch (err) {
-    console.error("Error fetching expenses:", err);
-  }
-
-  updateSettingsDisplay();
-  calculateMetrics();
-  populateTable();
-  renderCharts();
-}
 
 
 async function deleteExpense(id) {
