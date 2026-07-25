@@ -1,4 +1,35 @@
 
+// Auto-migrate cached localStorage CLAN Mail to $302 USD
+(function migrateClanMailStorage() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.includes('ims')) {
+        let val = localStorage.getItem(key);
+        if (val && (val.includes('clan-mail-1') || val.includes('Google Workspace CLAN') || val.includes('16,000'))) {
+          let data = JSON.parse(val);
+          if (Array.isArray(data)) {
+            let changed = false;
+            data.forEach(item => {
+              if (item.id === 'clan-mail-1' || (item.entity === 'CLAN' && item.category === 'Mail')) {
+                item.currency = 'USD';
+                item.price = 302.00;
+                item.name = 'Google Workspace CLAN';
+                item.details = 'Google Workspace ($302.00 USD/mo paid monthly by CLAN)';
+                changed = true;
+              }
+            });
+            if (changed) {
+              localStorage.setItem(key, JSON.stringify(data));
+            }
+          }
+        }
+      }
+    }
+  } catch (e) {}
+})();
+
+
 function persistExpensesToStorage() {
   try {
     localStorage.setItem('ims_expenses_v2_' + activeMonth, JSON.stringify(expenses));
