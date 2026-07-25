@@ -1,7 +1,7 @@
 {
   "settings": {
-    "usd_to_bdt": 124,
-    "eur_to_bdt": 142
+    "usd_to_bdt": 123,
+    "eur_to_bdt": 135
   },
   "customCategories": [
     "Monthly AI",
@@ -44,7 +44,7 @@
       "category": "Monthly AI",
       "name": "Abul Wazed",
       "email": "wazed@ims.com.bd",
-      "price": 23,
+      "price": 23.0,
       "currency": "USD",
       "dueDate": "Monthly",
       "extraCreditCost": 0,
@@ -86,7 +86,7 @@
       "category": "Monthly AI",
       "name": "Studio (admin)",
       "email": "admin@ims.com.bd",
-      "price": 23,
+      "price": 23.0,
       "currency": "USD",
       "dueDate": "Monthly",
       "extraCreditCost": 0,
@@ -282,7 +282,7 @@
       "category": "Mail",
       "name": "Google Workspace (ims.com.bd)",
       "email": "IMS Corporate Mail",
-      "price": 596,
+      "price": 596.0,
       "currency": "USD",
       "dueDate": "Monthly",
       "extraCreditCost": 0,
@@ -492,7 +492,7 @@
       "category": "Mail",
       "name": "Google Workspace (11 Seats)",
       "email": "scl.net.bd",
-      "price": 102,
+      "price": 102.0,
       "currency": "USD",
       "dueDate": "Monthly",
       "extraCreditCost": 0,
@@ -529,5 +529,6 @@
       "extraBillingFrequency": "monthly"
     }
   ],
-  "monthlyData": {}
+  "monthlyData": {},
+  "dbVersion": "v2_live_1784975956"
 }

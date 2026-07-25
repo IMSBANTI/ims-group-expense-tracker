@@ -39,50 +39,62 @@ function persistExpensesToStorage() {
   }
 }
 
+
 async function fetchExpenses() {
   try {
     let loadedData = false;
-    
-    // Check if user has saved modified state in LocalStorage for this month
-    const localSaved = localStorage.getItem('ims_expenses_v2_' + activeMonth) || localStorage.getItem('ims_expenses_v2');
-    if (localSaved) {
-      try {
-        const parsed = JSON.parse(localSaved);
-        if (Array.isArray(parsed)) {
-          expenses = parsed;
-          loadedData = true;
-        }
-      } catch(e) {}
-    }
 
-    if (!loadedData) {
-      if (isReadOnly) {
-        const res = await fetch('db.json');
-        if (res.ok) {
-          const data = await res.json();
-          if (data.monthlyData && data.monthlyData[activeMonth] && data.monthlyData[activeMonth].length > 0) {
-            expenses = data.monthlyData[activeMonth];
+    // 1. Fetch live db.json from server with cache-buster
+    try {
+      const res = await fetch('db.json?v=' + Date.now());
+      if (res.ok) {
+        const serverData = await res.json();
+        const serverVersion = serverData.dbVersion || '1.0.5';
+        const savedVersion = localStorage.getItem('ims_db_version');
+
+        // If local storage is uninitialized or older version, sync to server db.json
+        if (!savedVersion || savedVersion !== serverVersion) {
+          if (serverData.monthlyData && serverData.monthlyData[activeMonth] && serverData.monthlyData[activeMonth].length > 0) {
+            expenses = serverData.monthlyData[activeMonth];
           } else {
-            expenses = data.expenses || [];
+            expenses = serverData.expenses || [];
           }
-          settings = data.settings || { usd_to_bdt: 123, eur_to_bdt: 135 };
-          updateSettingsDisplay();
+          settings = serverData.settings || { usd_to_bdt: 123, eur_to_bdt: 135 };
+          localStorage.setItem('ims_expenses_v2_' + activeMonth, JSON.stringify(expenses));
+          localStorage.setItem('ims_db_version', serverVersion);
           loadedData = true;
-        }
-      } else {
-        try {
-          const res = await fetch(`${API_BASE}/api/expenses?month=${activeMonth}`);
-          if (res.ok) {
-            const apiExp = await res.json();
-            if (Array.isArray(apiExp) && apiExp.length > 0) {
-              expenses = apiExp;
-              loadedData = true;
-            }
-          }
-        } catch (apiErr) {
-          console.warn("API fetch failed:", apiErr);
         }
       }
+    } catch (e) {
+      console.warn("Could not fetch remote db.json:", e);
+    }
+
+    // 2. Fallback to LocalStorage if not loaded from fresh db.json
+    if (!loadedData) {
+      const localSaved = localStorage.getItem('ims_expenses_v2_' + activeMonth) || localStorage.getItem('ims_expenses_v2');
+      if (localSaved) {
+        try {
+          const parsed = JSON.parse(localSaved);
+          if (Array.isArray(parsed) && parsed.length > 0) {
+            expenses = parsed;
+            loadedData = true;
+          }
+        } catch(e) {}
+      }
+    }
+
+    // 3. Backend API sync if running Node server on localhost
+    if (!loadedData && !isReadOnly) {
+      try {
+        const res = await fetch(`${API_BASE}/api/expenses?month=${activeMonth}`);
+        if (res.ok) {
+          const apiExp = await res.json();
+          if (Array.isArray(apiExp) && apiExp.length > 0) {
+            expenses = apiExp;
+            loadedData = true;
+          }
+        }
+      } catch (apiErr) {}
     }
   } catch (err) {
     console.error("Error fetching expenses:", err);
@@ -93,6 +105,7 @@ async function fetchExpenses() {
   populateTable();
   renderCharts();
 }
+
 
 async function deleteExpense(id) {
   if (!confirm("Are you sure you want to delete this expense item?")) return;
@@ -1479,7 +1492,7 @@ async function fetchCategories() {
   customCategoriesList = ["Monthly AI", "Software", "Internet", "Mail", "Domain"];
   try {
     if (isReadOnly) {
-      const res = await fetch('db.json');
+      const res = await fetch('db.json?v=' + Date.now());
       if (res.ok) {
         const data = await res.json();
         if (data.customCategories && Array.isArray(data.customCategories)) {
@@ -1503,7 +1516,7 @@ async function fetchCategories() {
 async function fetchEntities() {
   try {
     if (isReadOnly) {
-      const res = await fetch('db.json');
+      const res = await fetch('db.json?v=' + Date.now());
       if (res.ok) {
         const data = await res.json();
         if (data.customEntities) customEntitiesList = data.customEntities;
