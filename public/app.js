@@ -1,4 +1,95 @@
 
+// Helper to persist expenses to LocalStorage
+function persistExpensesToStorage() {
+  try {
+    localStorage.setItem('ims_monthly_data_' + activeMonth, JSON.stringify(expenses));
+    localStorage.setItem('ims_expenses_v2', JSON.stringify(expenses));
+  } catch (e) {
+    console.warn("LocalStorage save warning:", e);
+  }
+}
+
+async function deleteExpense(id) {
+  if (!confirm("Are you sure you want to delete this expense item?")) return;
+
+  // Instant local state & storage update
+  expenses = expenses.filter(e => String(e.id) !== String(id));
+  persistExpensesToStorage();
+  calculateMetrics();
+  populateTable();
+  renderCharts();
+  showToast("Expense item deleted successfully", "success");
+
+  // Optional backend sync (fails silently on static hosts like GitHub Pages)
+  try {
+    if (API_BASE || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      await fetch(`${API_BASE}/api/expenses/${id}?month=${activeMonth}`, { method: 'DELETE' });
+    }
+  } catch (err) {
+    console.log("Backend delete sync skipped (static mode active)");
+  }
+}
+
+async function saveExpense(event) {
+  if (event) event.preventDefault();
+
+  const id = document.getElementById('expense-id').value || 'exp-' + Date.now();
+  const entity = document.getElementById('expense-entity').value;
+  const category = document.getElementById('expense-category').value;
+  const name = document.getElementById('expense-name').value;
+  const email = document.getElementById('expense-email').value;
+  const price = parseFloat(document.getElementById('expense-price').value) || 0;
+  const currency = document.getElementById('expense-currency').value;
+  const dueDate = document.getElementById('expense-due-date').value || 'Monthly';
+  const extraCreditCost = parseFloat(document.getElementById('expense-extra-cost').value) || 0;
+  const billingFrequency = document.getElementById('expense-billing-frequency').value || 'monthly';
+  const extraBillingFrequency = document.getElementById('expense-extra-billing-frequency').value || 'monthly';
+  const details = document.getElementById('expense-details').value || '';
+
+  const newExpense = {
+    id,
+    entity,
+    category,
+    name,
+    email,
+    price,
+    currency,
+    dueDate,
+    extraCreditCost,
+    details,
+    billingFrequency,
+    extraBillingFrequency
+  };
+
+  const existingIdx = expenses.findIndex(e => String(e.id) === String(id));
+  if (existingIdx >= 0) {
+    expenses[existingIdx] = newExpense;
+  } else {
+    expenses.unshift(newExpense);
+  }
+
+  persistExpensesToStorage();
+  closeExpenseModal();
+  calculateMetrics();
+  populateTable();
+  renderCharts();
+  showToast(existingIdx >= 0 ? "Expense updated successfully" : "New expense added successfully", "success");
+
+  // Optional backend sync
+  try {
+    if (API_BASE || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      await fetch(`${API_BASE}/api/expenses?month=${activeMonth}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newExpense)
+      });
+    }
+  } catch (err) {
+    console.log("Backend save sync skipped (static mode active)");
+  }
+}
+
+
 // Logo Path Normalizer & Storage Sanitizer
 function fixLogoPath(pathStr, fallbackCode) {
   if (!pathStr) {
@@ -998,81 +1089,13 @@ function closeExpenseModal() {
   document.getElementById('expense-modal').classList.remove('active');
 }
 
-async function saveExpense(e) {
-  e.preventDefault();
-  const id = document.getElementById('field-id').value;
-  
-  const rawPrice = parseFloat(document.getElementById('field-price').value);
-  const price = isNaN(rawPrice) ? 0 : rawPrice;
 
-  const rawExtraCost = parseFloat(document.getElementById('field-extra-cost').value);
-  const extraCreditCost = isNaN(rawExtraCost) ? 0 : rawExtraCost;
-
-  const rawUserCount = parseInt(document.getElementById('field-user-count').value);
-  const userCount = isNaN(rawUserCount) ? 0 : rawUserCount;
-
-  const rawCostPerUser = parseFloat(document.getElementById('field-cost-per-user').value);
-  const costPerUser = isNaN(rawCostPerUser) ? 0 : rawCostPerUser;
-
-  const payload = {
-    entity: document.getElementById('field-entity').value,
-    category: document.getElementById('field-category').value,
-    name: document.getElementById('field-name').value,
-    email: document.getElementById('field-email').value,
-    price: price,
-    currency: document.getElementById('field-currency').value,
-    extraCreditCost: extraCreditCost,
-    dueDate: document.getElementById('field-due-date').value,
-    details: document.getElementById('field-details').value,
-    billingFrequency: document.getElementById('field-billing-frequency').value,
-    extraBillingFrequency: document.getElementById('field-extra-billing-frequency').value,
-    isPerUser: document.getElementById('field-is-per-user').checked,
-    userCount: userCount,
-    costPerUser: costPerUser
-  };
-
-  const isEdit = !!id;
-  const url = isEdit ? `${API_BASE}/api/expenses/${id}?month=${activeMonth}` : `${API_BASE}/api/expenses?month=${activeMonth}`;
-  const method = isEdit ? 'PUT' : 'POST';
-
-  try {
-    const res = await fetch(url, {
-      method: method,
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-
-    if (!res.ok) {
-      const errData = await res.json().catch(() => ({}));
-      throw new Error(errData.error || "Failed to save expense item");
-    }
-    
-    closeExpenseModal();
-    showToast(isEdit ? "Expense updated successfully" : "New expense added successfully", "success");
-    fetchExpenses(); // Refresh
-  } catch (err) {
-    showToast(err.message || "Error saving expense item", "error");
-    console.error(err);
-  }
-}
 
 function editExpense(id) {
   openExpenseModal(id);
 }
 
-async function deleteExpense(id) {
-  if (!confirm("Are you sure you want to delete this expense item?")) return;
 
-  try {
-    const res = await fetch(`${API_BASE}/api/expenses/${id}?month=${activeMonth}`, { method: 'DELETE' });
-    if (!res.ok) throw new Error("Failed to delete item");
-    showToast("Expense item deleted", "success");
-    fetchExpenses();
-  } catch (err) {
-    showToast("Error deleting item", "error");
-    console.error(err);
-  }
-}
 
 // Settings modal
 function openSettingsModal() {
