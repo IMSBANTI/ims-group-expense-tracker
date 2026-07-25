@@ -1,3 +1,29 @@
+
+// Logo Path Normalizer & Storage Sanitizer
+function fixLogoPath(pathStr, fallbackCode) {
+  if (!pathStr) {
+    const code = (fallbackCode || 'IMS').toLowerCase();
+    return 'assets/' + code + '_logo.png';
+  }
+  return pathStr.replace(/^\/+/, '');
+}
+
+// Sanitize localStorage legacy paths
+(function sanitizeStorage() {
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key && key.includes('ims')) {
+        let val = localStorage.getItem(key);
+        if (val && val.includes('/assets/')) {
+          val = val.replace(/\/assets\//g, 'assets/');
+          localStorage.setItem(key, val);
+        }
+      }
+    }
+  } catch (e) {}
+})();
+
 // ==========================================================================
 // APP STATE & BRANDING CONFIG
 // ==========================================================================
@@ -629,7 +655,7 @@ function populateTable() {
       entityLogoHTML = `
         <div class="entity-cell-content" title="${config.fullName}">
           <div class="entity-logo-container">
-            <img src="${config.logo}" class="entity-logo-img" alt="${exp.entity}">
+            <img src="${fixLogoPath(config.logo, exp.entity)}" class="entity-logo-img" alt="${exp.entity}" onerror="this.onerror=null; this.src='assets/' + (this.alt||'IMS').toLowerCase() + '_logo.png';">
           </div>
         </div>
       `;
@@ -1473,7 +1499,7 @@ function populateEntityDropdowns() {
       const isActive = activeEntityFilter === e.code ? 'active' : '';
       let logoHTML = '';
       if (e.logo) {
-        logoHTML = `<img src="${e.logo}" style="height: 12px; max-width: 36px; object-fit: contain; background: white; padding: 1px 3px; border-radius: 2px;" alt="${e.code}">`;
+        logoHTML = `<img src="${fixLogoPath(e.logo, e.code)}" style="height: 12px; max-width: 36px; object-fit: contain; background: white; padding: 1px 3px; border-radius: 2px;" alt="${e.code}" onerror="this.onerror=null; this.src='assets/' + (this.alt||'IMS').toLowerCase() + '_logo.png';">`;
       }
       tabsHTML += `
         <button class="filter-tab ${isActive}" data-filter="${e.code}">
