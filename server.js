@@ -52,14 +52,30 @@ function writeDB(data) {
     }
 
     // 4. Automatically commit and push to GitHub (both main and gh-pages branches)
-    const gitCommand = 'git add db.json public/db.json && git commit -m "Auto-update database from dashboard" && git push origin main --force && git push origin main:gh-pages --force';
-    exec(gitCommand, { cwd: __dirname }, (error, stdout, stderr) => {
-      if (error) {
-        console.error("Git auto-push error:", error);
-      } else {
-        console.log("Git auto-push success:", stdout);
-      }
-    });
+    try {
+      exec('git add db.json public/db.json', { cwd: __dirname }, (err1) => {
+        if (err1) {
+          console.error("Git add failed:", err1.message);
+          return;
+        }
+        // Commit (handles empty commits gracefully by ignoring error code 1 if clean)
+        exec('git commit -m "Auto-update database from dashboard"', { cwd: __dirname }, (err2) => {
+          // Push to main and gh-pages regardless
+          exec('git push origin main --force', { cwd: __dirname }, (err3, stdout3) => {
+            if (err3) console.error("Git push main failed:", err3.message);
+            exec('git push origin main:gh-pages --force', { cwd: __dirname }, (err4, stdout4) => {
+              if (err4) {
+                console.error("Git push gh-pages failed:", err4.message);
+              } else {
+                console.log("Git sync to cloud completed successfully!");
+              }
+            });
+          });
+        });
+      });
+    } catch (gitErr) {
+      console.error("Git command execution failed:", gitErr.message);
+    }
 
     return true;
   } catch (err) {
@@ -357,6 +373,8 @@ app.delete('/api/expenses/:id', (req, res) => {
   } else {
     res.status(500).json({ error: "Failed to write database" });
   }
+});
+
 // POST Sync from Cloud
 app.post('/api/sync-cloud', (req, res) => {
   const db = req.body;
